@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  db:
+    image: 'postgres:15'
+    container_name: 'seller-db-postgres'
+    ports:
+      - '5432:5432'
+    environment:
+      - 'POSTGRES_USER=sa'
+      - 'POSTGRES_PASSWORD=123456'
+      - 'POSTGRES_DB=seller_db'
