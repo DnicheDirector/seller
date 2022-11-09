@@ -1,0 +1,21 @@
+
+server:
+  servlet:
+    context-path: /api
+
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog.xml
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/seller_db
+    username: sa
+    password: 123456
+
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: false
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
