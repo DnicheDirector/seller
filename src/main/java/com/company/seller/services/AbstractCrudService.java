@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 @RequiredArgsConstructor
 public abstract class AbstractCrudService<REPOSITORY extends JpaRepository<T, ID>, T, ID> {
 
-  private final REPOSITORY repository;
+  protected final REPOSITORY repository;
 
   public T getById(ID id) {
     return repository.findById(id).orElseThrow();
