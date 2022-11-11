@@ -19,11 +19,6 @@ public class PostgreSQLTestContainer extends PostgreSQLContainer<PostgreSQLTestC
   }
 
   @Override
-  public void start() {
-    super.start();
-  }
-
-  @Override
   public void stop() {
   }
 }
