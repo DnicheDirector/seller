@@ -4,7 +4,8 @@ import com.company.seller.company.models.Company;
 import com.company.seller.item.models.Item;
 import com.company.seller.user.models.User;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,11 +15,13 @@ import javax.persistence.SequenceGenerator;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Position {
@@ -42,7 +45,8 @@ public class Position {
   private User createdBy;
 
   @NotNull
-  private LocalDateTime created;
+  @Column(updatable = false)
+  private ZonedDateTime created;
 
   @NotNull
   @DecimalMin(value = "0.01")

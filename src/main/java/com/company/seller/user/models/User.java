@@ -1,8 +1,9 @@
 package com.company.seller.user.models;
 
 import com.company.seller.company.models.Company;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,12 +13,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "users")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -37,13 +41,15 @@ public class User {
 
   @NotNull
   @Enumerated(EnumType.STRING)
+  @Type(type = "role_enum")
   private Role role;
 
   @NotNull
-  private LocalDateTime created;
+  @Column(updatable = false)
+  private ZonedDateTime created;
 
   @NotNull
-  private LocalDateTime updated;
+  private ZonedDateTime updated;
 
   @ManyToOne(optional = false)
   private Company company;

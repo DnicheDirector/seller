@@ -2,8 +2,8 @@ package com.company.seller.category.controllers;
 
 import com.company.seller.category.mappers.CategoryMapper;
 import com.company.seller.category.services.CategoryService;
-import com.company.seller.category.views.CategoryInputViewModel;
-import com.company.seller.category.views.CategoryOutputViewModel;
+import com.company.seller.category.views.CategoryRequest;
+import com.company.seller.category.views.CategoryResponse;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +27,8 @@ public class CategoriesController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public CategoryOutputViewModel createCategory(
-      @RequestBody @Valid CategoryInputViewModel dto
+  public CategoryResponse createCategory(
+      @RequestBody @Valid CategoryRequest dto
   ) {
     var category = categoryMapper.fromCreateDto(dto);
     return categoryMapper.toDto(
@@ -38,7 +38,7 @@ public class CategoriesController {
 
   @GetMapping("{id}")
   @ResponseStatus(HttpStatus.OK)
-  public CategoryOutputViewModel getCategory(@PathVariable Long id) {
+  public CategoryResponse getCategory(@PathVariable Long id) {
     return categoryMapper.toDto(
         categoryService.getById(id)
     );
@@ -46,7 +46,7 @@ public class CategoriesController {
 
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
-  public List<CategoryOutputViewModel> getAll() {
+  public List<CategoryResponse> getAll() {
     return categoryMapper.toDto(
         categoryService.getAll()
     );
@@ -54,8 +54,8 @@ public class CategoriesController {
 
   @PutMapping("{id}")
   @ResponseStatus(HttpStatus.OK)
-  public CategoryOutputViewModel updateCategory(
-      @PathVariable Long id, @RequestBody @Valid CategoryInputViewModel dto
+  public CategoryResponse updateCategory(
+      @PathVariable Long id, @RequestBody @Valid CategoryRequest dto
   ) {
     var category = categoryMapper.fromUpdateDto(dto, id);
     return categoryMapper.toDto(

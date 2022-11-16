@@ -1,114 +1,105 @@
 package com.company.seller.user.controllers;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.company.seller.BaseTest;
 import com.company.seller.user.models.Role;
-import com.company.seller.user.views.UserInputViewModel;
-import com.company.seller.user.views.UserOutputViewModel;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import com.company.seller.user.views.UserRequest;
+import com.company.seller.user.views.UserResponse;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 
-@Sql(scripts = "/user/create-users-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/clean-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class UsersControllerTest extends BaseTest {
 
   private static final String BASE_PATH = "/users";
 
-  private static final Long COMPANY_ID = 100L;
-  private static final UUID[] IDS = {
-      UUID.fromString("fd422f25-7e5e-4b90-9d5f-cc835aa0900f"),
-      UUID.fromString("2d422f23-7e5e-4b90-9d5f-cc835aa0900f")
-  };
+  private Long companyId;
+  private List<UUID> usersIds;
 
-  @Test
-  public void createUserIfValidData() throws Exception {
-    var dto = UserInputViewModel.builder()
-        .name("Nick")
-        .username("username1")
-        .created(LocalDateTime.now())
-        .updated(LocalDateTime.now().plus(2, ChronoUnit.DAYS))
-        .email("email@gmail.com")
-        .role(Role.DIRECTOR.name())
-        .companyId(COMPANY_ID)
-        .build();
+  @BeforeEach
+  public void init() {
+    companyId = testHelper.createRandomCompany().getId();
 
-    var response = post(BASE_PATH, dto)
-        .andExpect(status().isCreated())
-        .andReturn().getResponse();
-    var body = getBody(response, UserOutputViewModel.class);
-
-    assertNotNull(body.getId());
-    assertEquals(dto.getName(), body.getName());
-    assertEquals(dto.getRole(), body.getRole());
-    assertEquals(dto.getCompanyId(), body.getCompanyId());
+    var user1 = testHelper.createRandomUser();
+    var user2 = testHelper.createRandomUser();
+    usersIds = Arrays.asList(user1.getId(), user2.getId());
   }
 
   @Test
-  public void createUserReturnsBadRequestIfInvalidData() throws Exception {
-    var dto = UserInputViewModel.builder()
+  public void createUserIfValidData() {
+    var dto = UserRequest.builder()
+        .name("Nick")
+        .username("username1")
+        .email("email@gmail.com")
+        .role(Role.DIRECTOR.name())
+        .companyId(companyId)
+        .build();
+
+    var result = post(BASE_PATH, dto, HttpStatus.CREATED, UserResponse.class);
+
+    assertNotNull(result.getId());
+    assertNotNull(result.getCreated());
+    assertNotNull(result.getUpdated());
+    assertEquals(dto.getName(), result.getName());
+    assertEquals(dto.getRole(), result.getRole());
+    assertEquals(dto.getCompanyId(), result.getCompanyId());
+  }
+
+  @Test
+  public void createUserReturnsBadRequestIfInvalidData() {
+    var dto = UserRequest.builder()
         .name("Kirill")
         .build();
 
-    post(BASE_PATH, dto)
-        .andExpect(status().isBadRequest());
+    post(BASE_PATH, dto, HttpStatus.BAD_REQUEST);
   }
 
   @Test
-  public void getUserIfExists() throws Exception {
-    var id = IDS[0];
-    var response = get(getPath(BASE_PATH, id))
-        .andExpect(status().isOk())
-        .andReturn().getResponse();
+  public void getUserIfExists() {
+    var id = usersIds.get(0);
+    var result = get(getPath(BASE_PATH, id), HttpStatus.OK, UserResponse.class);
 
-    var body = getBody(response, UserOutputViewModel.class);
-
-    assertEquals(id, body.getId());
+    assertEquals(id, result.getId());
   }
 
   @Test
-  public void getUserReturnsNotFoundIfDoesntExist() throws Exception {
-    get(getPath(BASE_PATH, "2eb43f59-19e3-4f17-9885-f5bc789f6cb6"))
-        .andExpect(status().isNotFound());
+  public void getUserReturnsNotFoundIfDoesntExist() {
+    get(getPath(BASE_PATH, "2eb43f59-19e3-4f17-9885-f5bc789f6cb6"), HttpStatus.NOT_FOUND);
   }
 
   @Test
-  public void getAllUsers() throws Exception {
-    get(BASE_PATH)
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$", hasSize(2)));
+  public void getAllUsers() {
+    var result = get(BASE_PATH, HttpStatus.OK, UserResponse[].class);
+    assertEquals(2, result.length);
   }
 
   @Test
-  public void successUpdateUser() throws Exception {
-    var dto = UserInputViewModel.builder()
+  public void successUpdateUser() {
+    var dto = UserRequest.builder()
         .name("Nick")
-        .created(LocalDateTime.now())
-        .updated(LocalDateTime.now().plus(2, ChronoUnit.DAYS))
         .email("updated@gmail.com")
         .username("username2")
         .role(Role.MANAGER.name())
-        .companyId(COMPANY_ID)
+        .companyId(companyId)
         .build();
 
-    var id = IDS[0];
+    var id = usersIds.get(0);
 
-    var response = put(getPath(BASE_PATH, id), dto)
-        .andExpect(status().isOk())
-        .andReturn().getResponse();
-    var body = getBody(response, UserOutputViewModel.class);
+    var result = put(getPath(BASE_PATH, id), dto, HttpStatus.OK, UserResponse.class);
 
-    assertEquals(id, body.getId());
-    assertEquals(dto.getName(), body.getName());
-    assertEquals(dto.getCreated(), body.getCreated());
-    assertEquals(dto.getRole(), body.getRole());
+    assertNotNull(result.getCreated());
+    assertNotNull(result.getUpdated());
+    assertTrue(result.getUpdated().isAfter(result.getCreated()));
+    assertEquals(id, result.getId());
+    assertEquals(dto.getName(), result.getName());
+    assertEquals(dto.getRole(), result.getRole());
   }
 }

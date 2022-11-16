@@ -1,6 +1,5 @@
-package com.company.seller.company.views;
+package com.company.seller.item.views;
 
-import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,13 +10,10 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompanyInputViewModel {
+public class ItemRequest {
   @NotNull
   private String name;
-  @NotNull
-  private String email;
-  @NotNull
-  private LocalDateTime created;
-  @NotNull
   private String description;
+  @NotNull
+  private Long categoryId;
 }

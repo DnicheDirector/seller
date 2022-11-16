@@ -1,6 +1,6 @@
-package com.company.seller.item.views;
+package com.company.seller.position.views;
 
-import java.util.UUID;
+import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,6 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class ItemOutputViewModel extends ItemInputViewModel {
-  private UUID id;
+public class PositionResponse extends PositionRequest {
+  private Long id;
+  private ZonedDateTime created;
 }

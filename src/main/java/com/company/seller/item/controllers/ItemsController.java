@@ -2,8 +2,8 @@ package com.company.seller.item.controllers;
 
 import com.company.seller.item.mappers.ItemMapper;
 import com.company.seller.item.services.ItemService;
-import com.company.seller.item.views.ItemInputViewModel;
-import com.company.seller.item.views.ItemOutputViewModel;
+import com.company.seller.item.views.ItemRequest;
+import com.company.seller.item.views.ItemResponse;
 import java.util.List;
 import java.util.UUID;
 import javax.validation.Valid;
@@ -28,8 +28,8 @@ public class ItemsController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public ItemOutputViewModel createItem(
-      @RequestBody @Valid ItemInputViewModel dto
+  public ItemResponse createItem(
+      @RequestBody @Valid ItemRequest dto
   ) {
     var item = itemMapper.fromCreateDto(dto);
     return itemMapper.toDto(
@@ -39,7 +39,7 @@ public class ItemsController {
 
   @GetMapping("{id}")
   @ResponseStatus(HttpStatus.OK)
-  public ItemOutputViewModel getItem(@PathVariable UUID id) {
+  public ItemResponse getItem(@PathVariable UUID id) {
     return itemMapper.toDto(
         itemService.getById(id)
     );
@@ -47,7 +47,7 @@ public class ItemsController {
 
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
-  public List<ItemOutputViewModel> getItem() {
+  public List<ItemResponse> getItem() {
     return itemMapper.toDto(
         itemService.getAll()
     );
@@ -55,8 +55,8 @@ public class ItemsController {
 
   @PutMapping("{id}")
   @ResponseStatus(HttpStatus.OK)
-  public ItemOutputViewModel updateItem(
-      @PathVariable UUID id, @RequestBody @Valid ItemInputViewModel dto
+  public ItemResponse updateItem(
+      @PathVariable UUID id, @RequestBody @Valid ItemRequest dto
   ) {
     var item = itemMapper.fromUpdateDto(dto, id);
     return itemMapper.toDto(

@@ -1,131 +1,122 @@
 package com.company.seller.position.controllers;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.company.seller.BaseTest;
-import com.company.seller.position.views.PositionInputViewModel;
-import com.company.seller.position.views.PositionOutputViewModel;
+import com.company.seller.position.views.PositionRequest;
+import com.company.seller.position.views.PositionResponse;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 
-@Sql(scripts = "/position/create-positions-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/clean-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class PositionsControllerTest extends BaseTest {
 
   private static final String BASE_PATH = "/positions";
 
-  private static final Long COMPANY_ID = 100L;
-  private static final UUID USER_ID = UUID.fromString("fd422f25-7e5e-4b90-9d5f-cc835aa0900f");
+  private Long companyId;
+  private UUID userId;
+  private List<Long> positionsIds;
+  private List<UUID> itemsIds;
 
-  private static final Long[] POSITION_IDS = { 10L, 11L };
+  @BeforeEach
+  public void init() {
+    companyId = testHelper.createRandomCompany().getId();
 
-  private static final UUID[] ITEM_IDS = {
-      UUID.fromString("b812e9a3-9c8f-46cd-ae79-cabecded7852"),
-      UUID.fromString("fd422f25-7e5e-4b90-9d5f-cc835aa0900f")
-  };
+    var item1 = testHelper.createRandomItem();
+    var item2 = testHelper.createRandomItem();
+    itemsIds = Arrays.asList(item1.getId(), item2.getId());
+
+    userId = testHelper.createRandomUser().getId();
+
+    var position1 = testHelper.createRandomPosition();
+    var position2 = testHelper.createRandomPosition();
+
+    positionsIds = Arrays.asList(position1.getId(), position2.getId());
+  }
 
   @Test
-  public void createPositionIfValidData() throws Exception {
-    var dto = PositionInputViewModel.builder()
-        .createdById(USER_ID)
+  public void createPositionIfValidData() {
+    var dto = PositionRequest.builder()
+        .createdById(userId)
         .amount(BigDecimal.valueOf(500))
-        .created(LocalDateTime.now())
-        .companyId(COMPANY_ID)
-        .itemId(ITEM_IDS[0])
-        .created(LocalDateTime.now())
+        .companyId(companyId)
+        .itemId(itemsIds.get(0))
         .build();
 
-    var response = post(BASE_PATH, dto)
-        .andExpect(status().isCreated())
-        .andReturn().getResponse();
-    var body = getBody(response, PositionOutputViewModel.class);
+    var result = post(BASE_PATH, dto, HttpStatus.CREATED, PositionResponse.class);
 
-    assertNotNull(body.getId());
-    assertEquals(dto.getItemId(), body.getItemId());
-    assertEquals(dto.getCreatedById(), body.getCreatedById());
-    assertEquals(dto.getCompanyId(), body.getCompanyId());
-    assertEquals(dto.getCreated(), body.getCreated());
-    assertEquals(dto.getAmount(), body.getAmount());
+    assertNotNull(result.getId());
+    assertNotNull(result.getCreated());
+    assertEquals(dto.getItemId(), result.getItemId());
+    assertEquals(dto.getCreatedById(), result.getCreatedById());
+    assertEquals(dto.getCompanyId(), result.getCompanyId());
+    assertEquals(dto.getAmount(), result.getAmount());
   }
 
   @Test
-  public void createPositionReturnsBadRequestIfInvalidData() throws Exception {
-    var dto = PositionInputViewModel.builder()
-        .createdById(USER_ID)
+  public void createPositionReturnsBadRequestIfInvalidData() {
+    var dto = PositionRequest.builder()
+        .createdById(userId)
         .build();
 
-    post(BASE_PATH, dto)
-        .andExpect(status().isBadRequest());
+    post(BASE_PATH, dto, HttpStatus.BAD_REQUEST);
   }
 
   @Test
-  public void getPositionIfExists() throws Exception {
-    var id = POSITION_IDS[0];
-    var response = get(getPath(BASE_PATH, id))
-        .andExpect(status().isOk())
-        .andReturn().getResponse();
+  public void getPositionIfExists() {
+    var id = positionsIds.get(0);
+    var result = get(getPath(BASE_PATH, id), HttpStatus.OK, PositionResponse.class);
 
-    var body = getBody(response, PositionOutputViewModel.class);
-
-    assertEquals(id, body.getId());
+    assertEquals(id, result.getId());
   }
 
   @Test
-  public void getPositionReturnsNotFoundIfDoesntExist() throws Exception {
-    get(getPath(BASE_PATH, 1000L))
-        .andExpect(status().isNotFound());
+  public void getPositionReturnsNotFoundIfDoesntExist() {
+    get(getPath(BASE_PATH, 1000L), HttpStatus.NOT_FOUND);
   }
 
   @Test
-  public void getAllPositions() throws Exception {
+  public void getAllPositions() {
     getAll(2);
   }
 
   @Test
-  public void successUpdatePosition() throws Exception {
-    var dto = PositionInputViewModel.builder()
-        .createdById(USER_ID)
+  public void successUpdatePosition() {
+    var dto = PositionRequest.builder()
+        .createdById(userId)
         .amount(BigDecimal.valueOf(1000))
-        .created(LocalDateTime.now())
-        .companyId(COMPANY_ID)
-        .itemId(ITEM_IDS[1])
-        .created(LocalDateTime.now())
+        .companyId(companyId)
+        .itemId(itemsIds.get(1))
         .build();
 
-    var id = POSITION_IDS[0];
+    var id = positionsIds.get(0);
 
-    var response = put(getPath(BASE_PATH, id), dto)
-        .andExpect(status().isOk())
-        .andReturn().getResponse();
-    var body = getBody(response, PositionOutputViewModel.class);
+    var result = put(getPath(BASE_PATH, id), dto, HttpStatus.OK, PositionResponse.class);
 
-    assertEquals(id, body.getId());
-    assertEquals(dto.getItemId(), body.getItemId());
-    assertEquals(dto.getCreatedById(), body.getCreatedById());
-    assertEquals(dto.getCompanyId(), body.getCompanyId());
-    assertEquals(dto.getCreated(), body.getCreated());
-    assertEquals(dto.getAmount(), body.getAmount());
+    assertNotNull(result.getCreated());
+    assertEquals(id, result.getId());
+    assertEquals(dto.getItemId(), result.getItemId());
+    assertEquals(dto.getCreatedById(), result.getCreatedById());
+    assertEquals(dto.getCompanyId(), result.getCompanyId());
+    assertEquals(dto.getAmount(), result.getAmount());
   }
 
   @Test
-  public void successDelete() throws Exception {
+  public void successDelete() {
     getAll(2);
-    delete(getPath(BASE_PATH, POSITION_IDS[0]))
-        .andExpect(status().isNoContent());
+    delete(getPath(BASE_PATH, positionsIds.get(0)), HttpStatus.NO_CONTENT);
     getAll(1);
   }
 
-  private void getAll(int expectedSize) throws Exception {
-    get(BASE_PATH)
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$", hasSize(expectedSize)));
+  private void getAll(int expectedSize) {
+    var result = get(BASE_PATH, HttpStatus.OK, PositionResponse[].class);
+    assertEquals(expectedSize, result.length);
   }
 }

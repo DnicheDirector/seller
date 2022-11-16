@@ -1,90 +1,85 @@
 package com.company.seller.category.controllers;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.company.seller.BaseTest;
-import com.company.seller.category.views.CategoryInputViewModel;
-import com.company.seller.category.views.CategoryOutputViewModel;
+import com.company.seller.category.views.CategoryRequest;
+import com.company.seller.category.views.CategoryResponse;
+import java.util.Arrays;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 
 
-@Sql(scripts = "/category/create-categories-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/clean-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class CategoriesControllerTest extends BaseTest {
 
   private static final String BASE_PATH = "/categories";
-  private static final Long[] IDS = {10L, 11L};
+
+  private List<Long> ids;
+
+  @BeforeEach
+  public void init() {
+    var category1 = testHelper.createRandomCategory();
+    var category2 = testHelper.createRandomCategory();
+    ids = Arrays.asList(category1.getId(), category2.getId());
+  }
 
   @Test
-  public void createCategoryIfValidData() throws Exception {
-    var dto = CategoryInputViewModel.builder()
+  public void createCategoryIfValidData() {
+    var dto = CategoryRequest.builder()
         .name("category1")
         .build();
 
-    var response = post(BASE_PATH, dto)
-        .andExpect(status().isCreated())
-        .andReturn().getResponse();
-    var body = getBody(response, CategoryOutputViewModel.class);
+    var result = post(BASE_PATH, dto, HttpStatus.CREATED, CategoryResponse.class);
 
-    assertNotNull(body.getId());
-    assertEquals(dto.getName(), body.getName());
+    assertNotNull(result.getId());
+    assertEquals(dto.getName(), result.getName());
   }
 
   @Test
-  public void createCategoryReturnsBadRequestIfInvalidData() throws Exception {
-    var dto = CategoryInputViewModel.builder()
+  public void createCategoryReturnsBadRequestIfInvalidData() {
+    var dto = CategoryRequest.builder()
+        .description("description")
         .build();
 
-    post(BASE_PATH, dto)
-        .andExpect(status().isBadRequest());
+    post(BASE_PATH, dto, HttpStatus.BAD_REQUEST);
   }
 
   @Test
-  public void getCategoryIfExists() throws Exception {
-    var id = IDS[0];
-    var response = get(getPath(BASE_PATH, id))
-        .andExpect(status().isOk())
-        .andReturn().getResponse();
+  public void getCategoryIfExists() {
+    var id = ids.get(0);
+    var result = get(getPath(BASE_PATH, id), HttpStatus.OK, CategoryResponse.class);
 
-    var body = getBody(response, CategoryOutputViewModel.class);
-
-    assertEquals(id, body.getId());
+    assertEquals(id, result.getId());
   }
 
   @Test
-  public void getCategoryReturnsNotFoundIfDoesntExist() throws Exception {
-    get(getPath(BASE_PATH, 1000L))
-        .andExpect(status().isNotFound());
+  public void getCategoryReturnsNotFoundIfDoesntExist() {
+    get(getPath(BASE_PATH, 1000L), HttpStatus.NOT_FOUND);
   }
 
   @Test
-  public void getAllCategories() throws Exception {
-    get(BASE_PATH)
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$", hasSize(2)));
+  public void getAllCategories() {
+    var result = get(BASE_PATH, HttpStatus.OK, CategoryResponse[].class);
+    assertEquals(2, result.length);
   }
 
   @Test
-  public void successUpdateCategory() throws Exception {
-    var id = IDS[1];
+  public void successUpdateCategory() {
+    var id = ids.get(1);
 
-    var dto = CategoryInputViewModel.builder()
+    var dto = CategoryRequest.builder()
         .name("updatedCategory")
-        .parentCategoryId(IDS[0])
+        .parentCategoryId(ids.get(0))
         .build();
 
-    var response = put(getPath(BASE_PATH, id), dto)
-        .andExpect(status().isOk())
-        .andReturn().getResponse();
-    var body = getBody(response, CategoryOutputViewModel.class);
+    var result = put(getPath(BASE_PATH, id), dto, HttpStatus.OK, CategoryResponse.class);
 
-    assertEquals(id, body.getId());
-    assertEquals(dto.getParentCategoryId(), body.getParentCategoryId());
+    assertEquals(id, result.getId());
+    assertEquals(dto.getParentCategoryId(), result.getParentCategoryId());
   }
 }

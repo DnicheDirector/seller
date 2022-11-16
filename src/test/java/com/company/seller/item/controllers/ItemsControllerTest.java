@@ -1,102 +1,89 @@
 package com.company.seller.item.controllers;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.company.seller.BaseTest;
-import com.company.seller.item.views.ItemInputViewModel;
-import com.company.seller.item.views.ItemOutputViewModel;
-import java.time.LocalDateTime;
+import com.company.seller.item.views.ItemRequest;
+import com.company.seller.item.views.ItemResponse;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 
-@Sql(scripts = "/item/create-items-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/clean-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ItemsControllerTest extends BaseTest {
 
   private static final String BASE_PATH = "/items";
 
-  private static final Long CATEGORY_ID = 10L;
-  private static final UUID[] IDS = {
-      UUID.fromString("b812e9a3-9c8f-46cd-ae79-cabecded7852"),
-      UUID.fromString("fd422f25-7e5e-4b90-9d5f-cc835aa0900f")
-  };
+  private Long categoryId;
+  private List<UUID> ids;
 
-  @Test
-  public void createItemIfValidData() throws Exception {
-    var dto = ItemInputViewModel.builder()
-        .name("item1")
-        .created(LocalDateTime.now())
-        .categoryId(CATEGORY_ID)
-        .build();
-
-    var response = post(BASE_PATH, dto)
-        .andExpect(status().isCreated())
-        .andReturn().getResponse();
-    var body = getBody(response, ItemOutputViewModel.class);
-
-    assertNotNull(body.getId());
-    assertEquals(dto.getName(), body.getName());
+  @BeforeEach
+  public void init() {
+    var item1 = testHelper.createRandomItem();
+    var item2 = testHelper.createRandomItem();
+    ids = Arrays.asList(item1.getId(), item2.getId());
+    categoryId = testHelper.createRandomCategory().getId();
   }
 
   @Test
-  public void createItemReturnsBadRequestIfInvalidData() throws Exception {
-    var dto = ItemInputViewModel.builder()
+  public void createItemIfValidData() {
+    var dto = ItemRequest.builder()
+        .name("item1")
+        .categoryId(categoryId)
+        .build();
+
+    var result = post(BASE_PATH, dto, HttpStatus.CREATED, ItemResponse.class);
+
+    assertNotNull(result.getId());
+    assertEquals(dto.getName(), result.getName());
+  }
+
+  @Test
+  public void createItemReturnsBadRequestIfInvalidData() {
+    var dto = ItemRequest.builder()
         .name("randomName")
         .build();
 
-    post(BASE_PATH, dto)
-        .andExpect(status().isBadRequest());
+    post(BASE_PATH, dto, HttpStatus.BAD_REQUEST);
   }
 
   @Test
-  public void getItemIfExists() throws Exception {
-    var id = IDS[0];
-    var response = get(getPath(BASE_PATH, id))
-        .andExpect(status().isOk())
-        .andReturn().getResponse();
+  public void getItemIfExists() {
+    var id = ids.get(0);
+    var result = get(getPath(BASE_PATH, id), HttpStatus.OK, ItemResponse.class);
 
-    var body = getBody(response, ItemOutputViewModel.class);
-
-    assertEquals(id, body.getId());
+    assertEquals(id, result.getId());
   }
 
   @Test
-  public void getItemReturnsNotFoundIfDoesntExist() throws Exception {
-    get(getPath(BASE_PATH, "2eb43f59-19e3-4f17-9885-f5bc789f6cb6"))
-        .andExpect(status().isNotFound());
+  public void getItemReturnsNotFoundIfDoesntExist() {
+    get(getPath(BASE_PATH, "2eb43f59-19e3-4f17-9885-f5bc789f6cb6"), HttpStatus.NOT_FOUND);
   }
 
   @Test
-  public void getAllItem() throws Exception {
-    get(BASE_PATH)
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$", hasSize(2)));
+  public void getAllItem() {
+    var result = get(BASE_PATH, HttpStatus.OK, ItemResponse[].class);
+    assertEquals(2, result.length);
   }
 
   @Test
-  public void successUpdateItem() throws Exception {
-    var dto = ItemInputViewModel.builder()
+  public void successUpdateItem() {
+    var dto = ItemRequest.builder()
         .name("updatedItem")
-        .created(LocalDateTime.now())
-        .categoryId(CATEGORY_ID)
+        .categoryId(categoryId)
         .build();
 
-    var id = IDS[0];
+    var id = ids.get(0);
 
-    var response = put(getPath(BASE_PATH, id), dto)
-        .andExpect(status().isOk())
-        .andReturn().getResponse();
-    var body = getBody(response, ItemOutputViewModel.class);
+    var result = put(getPath(BASE_PATH, id), dto, HttpStatus.OK, ItemResponse.class);
 
-    assertEquals(id, body.getId());
-    assertEquals(dto.getName(), body.getName());
-    assertEquals(dto.getCreated(), body.getCreated());
+    assertEquals(id, result.getId());
+    assertEquals(dto.getName(), result.getName());
+    assertNotNull(result.getCreated());
   }
 
 }

@@ -1,18 +1,18 @@
 package com.company.seller.category.views;
 
-import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryInputViewModel {
-  @NotNull
-  private String name;
-  private Long parentCategoryId;
-  private String description;
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+public class CategoryResponse extends CategoryRequest {
+  private Long id;
 }

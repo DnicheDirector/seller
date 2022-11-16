@@ -1,16 +1,16 @@
 package com.company.seller.company.mappers;
 
 import com.company.seller.company.models.Company;
-import com.company.seller.company.views.CompanyInputViewModel;
-import com.company.seller.company.views.CompanyOutputViewModel;
+import com.company.seller.company.views.CompanyRequest;
+import com.company.seller.company.views.CompanyResponse;
 import java.util.List;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface CompanyMapper {
-  Company fromCreateDto(CompanyInputViewModel dto);
-  Company fromUpdateDto(CompanyInputViewModel dto, Long id);
+  Company fromCreateDto(CompanyRequest dto);
+  Company fromUpdateDto(CompanyRequest dto, Long id);
 
-  CompanyOutputViewModel toDto(Company company);
-  List<CompanyOutputViewModel> toDto(List<Company> company);
+  CompanyResponse toDto(Company company);
+  List<CompanyResponse> toDto(List<Company> company);
 }

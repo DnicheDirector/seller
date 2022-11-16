@@ -1,33 +1,40 @@
 package com.company.seller;
 
+import static io.restassured.RestAssured.given;
+
 import com.company.seller.containers.PostgreSQLTestContainer;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Testcontainers
 public class BaseTest {
 
-  @Autowired
-  protected MockMvc mockMvc;
+  @LocalServerPort
+  private int port;
 
-  @Autowired
-  protected ObjectMapper objectMapper;
+  @BeforeEach
+  public void setUp() {
+    RestAssured.port = port;
+  }
 
   @Container
   public static PostgreSQLTestContainer postgreSQLContainer = PostgreSQLTestContainer.getInstance();
+
+  @Autowired
+  protected TestHelper testHelper;
 
   @DynamicPropertySource
   public static void overrideProperties(DynamicPropertyRegistry registry) {
@@ -37,40 +44,58 @@ public class BaseTest {
     registry.add("spring.datasource.driver-class-name", postgreSQLContainer::getDriverClassName);
   }
 
-  protected ResultActions get(String path) throws Exception {
-    return mockMvc.perform(MockMvcRequestBuilders
-        .get(path)
-        .accept(MediaType.APPLICATION_JSON)
-    );
+  protected <T> T get(String path, HttpStatus expectedStatusCode, Class<T> classType) {
+    return get(path, expectedStatusCode)
+        .extract()
+        .as(classType);
   }
 
-  protected ResultActions put(String path, Object toSend) throws Exception {
-    return mockMvc.perform(MockMvcRequestBuilders
+  protected ValidatableResponse get(String path, HttpStatus expectedStatusCode) {
+    return RestAssured.get(path)
+        .then()
+        .assertThat()
+        .statusCode(expectedStatusCode.value());
+  }
+
+  protected <T> T put(String path, Object body, HttpStatus expectedStatusCode, Class<T> classType) {
+    return put(path, body, expectedStatusCode)
+        .extract()
+        .as(classType);
+  }
+
+  protected ValidatableResponse put(String path, Object body, HttpStatus expectedStatusCode) {
+    return given()
+        .body(body)
+        .contentType(ContentType.JSON)
+        .when()
         .put(path)
-        .content(objectMapper.writeValueAsString(toSend))
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON)
-    );
+        .then()
+        .assertThat()
+        .statusCode(expectedStatusCode.value());
   }
 
-  protected ResultActions post(String path, Object toSend) throws Exception {
-    return mockMvc.perform(MockMvcRequestBuilders
+  protected <T> T post(String path, Object body, HttpStatus expectedStatusCode, Class<T> classType) {
+    return post(path, body, expectedStatusCode)
+        .extract()
+        .as(classType);
+  }
+
+  protected ValidatableResponse post(String path, Object body, HttpStatus expectedStatusCode) {
+    return given()
+        .body(body)
+        .contentType(ContentType.JSON)
+        .when()
         .post(path)
-        .content(objectMapper.writeValueAsString(toSend))
-        .contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON)
-    );
+        .then()
+        .assertThat()
+        .statusCode(expectedStatusCode.value());
   }
 
-  protected ResultActions delete(String path) throws Exception {
-    return mockMvc.perform(MockMvcRequestBuilders
-        .delete(path)
-        .accept(MediaType.APPLICATION_JSON)
-    );
-  }
-
-  protected <T> T getBody(MockHttpServletResponse response, Class<T> classType) throws Exception {
-    return objectMapper.readValue(response.getContentAsString(), classType);
+  protected void delete(String path, HttpStatus expectedStatusCode) {
+    RestAssured.delete(path)
+        .then()
+        .assertThat()
+        .statusCode(expectedStatusCode.value());
   }
 
   protected <ID> String getPath(String path, ID id) {

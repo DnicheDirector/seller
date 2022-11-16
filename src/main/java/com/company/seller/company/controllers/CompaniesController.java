@@ -2,8 +2,8 @@ package com.company.seller.company.controllers;
 
 import com.company.seller.company.mappers.CompanyMapper;
 import com.company.seller.company.services.CompanyService;
-import com.company.seller.company.views.CompanyInputViewModel;
-import com.company.seller.company.views.CompanyOutputViewModel;
+import com.company.seller.company.views.CompanyRequest;
+import com.company.seller.company.views.CompanyResponse;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +27,8 @@ public class CompaniesController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public CompanyOutputViewModel createCompany(
-      @RequestBody @Valid CompanyInputViewModel dto
+  public CompanyResponse createCompany(
+      @RequestBody @Valid CompanyRequest dto
   ) {
     var company = companyMapper.fromCreateDto(dto);
     return companyMapper.toDto(
@@ -38,7 +38,7 @@ public class CompaniesController {
 
   @GetMapping("{id}")
   @ResponseStatus(HttpStatus.OK)
-  public CompanyOutputViewModel getCompany(@PathVariable Long id) {
+  public CompanyResponse getCompany(@PathVariable Long id) {
     return companyMapper.toDto(
         companyService.getById(id)
     );
@@ -46,7 +46,7 @@ public class CompaniesController {
 
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
-  public List<CompanyOutputViewModel> getAll() {
+  public List<CompanyResponse> getAll() {
     return companyMapper.toDto(
         companyService.getAll()
     );
@@ -54,8 +54,8 @@ public class CompaniesController {
 
   @PutMapping("{id}")
   @ResponseStatus(HttpStatus.OK)
-  public CompanyOutputViewModel updateCompany(
-      @PathVariable Long id, @RequestBody @Valid CompanyInputViewModel dto
+  public CompanyResponse updateCompany(
+      @PathVariable Long id, @RequestBody @Valid CompanyRequest dto
   ) {
     var company = companyMapper.fromUpdateDto(dto, id);
     return companyMapper.toDto(

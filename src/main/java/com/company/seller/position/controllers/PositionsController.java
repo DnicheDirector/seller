@@ -2,8 +2,8 @@ package com.company.seller.position.controllers;
 
 import com.company.seller.position.mappers.PositionMapper;
 import com.company.seller.position.services.PositionService;
-import com.company.seller.position.views.PositionInputViewModel;
-import com.company.seller.position.views.PositionOutputViewModel;
+import com.company.seller.position.views.PositionRequest;
+import com.company.seller.position.views.PositionResponse;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +28,8 @@ public class PositionsController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public PositionOutputViewModel createPosition(
-      @RequestBody @Valid PositionInputViewModel dto
+  public PositionResponse createPosition(
+      @RequestBody @Valid PositionRequest dto
   ) {
     var position = positionMapper.fromCreateDto(dto);
     return positionMapper.toDto(
@@ -39,7 +39,7 @@ public class PositionsController {
 
   @GetMapping("{id}")
   @ResponseStatus(HttpStatus.OK)
-  public PositionOutputViewModel getPosition(@PathVariable Long id) {
+  public PositionResponse getPosition(@PathVariable Long id) {
     return positionMapper.toDto(
         positionService.getById(id)
     );
@@ -47,7 +47,7 @@ public class PositionsController {
 
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
-  public List<PositionOutputViewModel> getPosition() {
+  public List<PositionResponse> getPosition() {
     return positionMapper.toDto(
         positionService.getAll()
     );
@@ -55,8 +55,8 @@ public class PositionsController {
 
   @PutMapping("{id}")
   @ResponseStatus(HttpStatus.OK)
-  public PositionOutputViewModel updatePosition(
-      @PathVariable Long id, @RequestBody @Valid PositionInputViewModel dto
+  public PositionResponse updatePosition(
+      @PathVariable Long id, @RequestBody @Valid PositionRequest dto
   ) {
     var position = positionMapper.fromUpdateDto(dto, id);
     return positionMapper.toDto(

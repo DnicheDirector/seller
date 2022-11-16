@@ -1,6 +1,5 @@
 package com.company.seller.user.views;
 
-import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserInputViewModel {
+public class UserRequest {
   @NotNull
   private String username;
   @NotNull
@@ -20,10 +19,6 @@ public class UserInputViewModel {
   private String name;
   @NotNull
   private String role;
-  @NotNull
-  private LocalDateTime created;
-  @NotNull
-  private LocalDateTime updated;
   @NotNull
   private Long companyId;
 }

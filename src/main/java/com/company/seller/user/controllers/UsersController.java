@@ -2,8 +2,8 @@ package com.company.seller.user.controllers;
 
 import com.company.seller.user.mappers.UserMapper;
 import com.company.seller.user.services.UserService;
-import com.company.seller.user.views.UserInputViewModel;
-import com.company.seller.user.views.UserOutputViewModel;
+import com.company.seller.user.views.UserRequest;
+import com.company.seller.user.views.UserResponse;
 import java.util.List;
 import java.util.UUID;
 import javax.validation.Valid;
@@ -28,8 +28,8 @@ public class UsersController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public UserOutputViewModel createUser(
-      @RequestBody @Valid UserInputViewModel dto
+  public UserResponse createUser(
+      @RequestBody @Valid UserRequest dto
   ) {
     var user = userMapper.fromCreateDto(dto);
     return userMapper.toDto(
@@ -39,7 +39,7 @@ public class UsersController {
 
   @GetMapping("{id}")
   @ResponseStatus(HttpStatus.OK)
-  public UserOutputViewModel getUser(@PathVariable UUID id) {
+  public UserResponse getUser(@PathVariable UUID id) {
     return userMapper.toDto(
         userService.getById(id)
     );
@@ -47,7 +47,7 @@ public class UsersController {
 
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
-  public List<UserOutputViewModel> getUser() {
+  public List<UserResponse> getUser() {
     return userMapper.toDto(
         userService.getAll()
     );
@@ -55,8 +55,8 @@ public class UsersController {
 
   @PutMapping("{id}")
   @ResponseStatus(HttpStatus.OK)
-  public UserOutputViewModel updateUser(
-      @PathVariable UUID id, @RequestBody  @Valid UserInputViewModel dto
+  public UserResponse updateUser(
+      @PathVariable UUID id, @RequestBody  @Valid UserRequest dto
   ) {
     var user = userMapper.fromUpdateDto(dto, id);
     return userMapper.toDto(

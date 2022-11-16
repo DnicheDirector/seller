@@ -1,6 +1,5 @@
-package com.company.seller.item.views;
+package com.company.seller.category.views;
 
-import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,12 +10,9 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemInputViewModel {
+public class CategoryRequest {
   @NotNull
   private String name;
+  private Long parentCategoryId;
   private String description;
-  @NotNull
-  private LocalDateTime created;
-  @NotNull
-  private Long categoryId;
 }

@@ -1,96 +1,82 @@
 package com.company.seller.company.controllers;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.company.seller.BaseTest;
-import com.company.seller.company.views.CompanyInputViewModel;
-import com.company.seller.company.views.CompanyOutputViewModel;
-import java.time.LocalDateTime;
+import com.company.seller.company.views.CompanyRequest;
+import com.company.seller.company.views.CompanyResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 
-@Sql(scripts = "/company/create-company-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "/clean-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class CompaniesControllerTest extends BaseTest {
 
-  private static final Long COMPANY_ID = 100L;
   private static final String BASE_PATH = "/companies";
 
+  private Long companyId;
+
+  @BeforeEach
+  public void createCompany() {
+    companyId = testHelper.createRandomCompany().getId();
+  }
+
   @Test
-  public void createCompanyIfValidData() throws Exception {
-    var dto = CompanyInputViewModel.builder()
+  public void createCompanyIfValidData() {
+    var dto = CompanyRequest.builder()
         .name("company1")
         .email("example@gmail.com")
-        .created(LocalDateTime.now())
         .description("123")
         .build();
 
-    var response = post(BASE_PATH, dto)
-            .andExpect(status().isCreated())
-            .andReturn().getResponse();
-    var body = getBody(response, CompanyOutputViewModel.class);
+    var result = post(BASE_PATH, dto, HttpStatus.CREATED, CompanyResponse.class);
 
-    assertNotNull(body.getId());
-    assertEquals(dto.getName(), body.getName());
+    assertNotNull(result.getId());
+    assertEquals(dto.getName(), result.getName());
   }
 
   @Test
-  public void createCompanyReturnsBadRequestIfInvalidData() throws Exception {
-    var dto = CompanyInputViewModel.builder()
+  public void createCompanyReturnsBadRequestIfInvalidData() {
+    var dto = CompanyRequest.builder()
         .name("company1")
         .build();
 
-    post(BASE_PATH, dto)
-        .andExpect(status().isBadRequest());
+    post(BASE_PATH, dto, HttpStatus.BAD_REQUEST);
   }
 
   @Test
-  public void getCompanyIfExists() throws Exception {
-    var response = get(getPath(BASE_PATH, COMPANY_ID))
-        .andExpect(status().isOk())
-        .andReturn().getResponse();
-
-    var body = getBody(response, CompanyOutputViewModel.class);
-
-    assertEquals(COMPANY_ID, body.getId());
+  public void getCompanyIfExists() {
+    var result = get(getPath(BASE_PATH, companyId), HttpStatus.OK, CompanyResponse.class);
+    assertEquals(companyId, result.getId());
   }
 
   @Test
-  public void getCompanyReturnsNotFoundIfDoesntExist() throws Exception {
-    get(getPath(BASE_PATH, 1000L))
-        .andExpect(status().isNotFound());
+  public void getCompanyReturnsNotFoundIfDoesntExist() {
+    get(getPath(BASE_PATH, 1000L), HttpStatus.NOT_FOUND);
   }
 
   @Test
-  public void getAllCompanies() throws Exception {
-    get(BASE_PATH)
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$", hasSize(1)));
+  public void getAllCompanies() {
+    var result = get(BASE_PATH, HttpStatus.OK, CompanyResponse[].class);
+    assertEquals(1, result.length);
   }
 
   @Test
-  public void successUpdateCompany() throws Exception {
-    var dto = CompanyInputViewModel.builder()
+  public void successUpdateCompany() {
+    var dto = CompanyRequest.builder()
         .name("updatedCompany")
         .email("updated@gmail.com")
-        .created(LocalDateTime.now())
         .description("newDescription")
         .build();
 
-    var response = put(getPath(BASE_PATH, COMPANY_ID), dto)
-        .andExpect(status().isOk())
-        .andReturn().getResponse();
-    var body = getBody(response, CompanyOutputViewModel.class);
+    var result = put(getPath(BASE_PATH, companyId), dto, HttpStatus.OK, CompanyResponse.class);
 
-    assertEquals(COMPANY_ID, body.getId());
-    assertEquals(dto.getEmail(), body.getEmail());
-    assertEquals(dto.getName(), body.getName());
-    assertEquals(dto.getDescription(), body.getDescription());
-    assertEquals(dto.getCreated(), body.getCreated());
+    assertNotNull(result.getCreated());
+    assertEquals(companyId, result.getId());
+    assertEquals(dto.getEmail(), result.getEmail());
+    assertEquals(dto.getName(), result.getName());
+    assertEquals(dto.getDescription(), result.getDescription());
   }
 }
