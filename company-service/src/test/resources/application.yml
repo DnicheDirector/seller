@@ -1,0 +1,6 @@
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/companies/db.changelog.xml
+  cloud:
+    config:
+      enabled: false

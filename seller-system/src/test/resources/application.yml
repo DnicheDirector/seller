@@ -1,0 +1,19 @@
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            company-service[0]:
+              uri: http://localhost:${wiremock.server.port}
+    config:
+      enabled: false
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog.xml
+
+eureka:
+  client:
+    enabled: false
+
+wiremock:
+  reset-mappings-after-each-test: true
