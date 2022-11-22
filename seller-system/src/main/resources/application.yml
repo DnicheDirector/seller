@@ -6,6 +6,10 @@ server:
 spring:
   application:
     name: seller-system
+  jpa:
+    properties:
+      hibernate:
+        default_schema: seller_system
   profiles:
     active: postgres-local
   config:

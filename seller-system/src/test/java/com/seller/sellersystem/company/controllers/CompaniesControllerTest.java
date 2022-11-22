@@ -54,14 +54,14 @@ public class CompaniesControllerTest extends BaseTest {
 
     @Test
     public void getCompanyIfExists() {
-        companiesMockTestHelper.mockGetById(companyId, testHelper.createRandomCompany());
+        companiesMockTestHelper.mockGetById(companyId);
         var result = get(getPath(BASE_PATH, companyId), HttpStatus.OK, CompanyResponse.class);
         assertEquals(companyId, result.getId());
     }
 
     @Test
     public void getAllCompanies() {
-        companiesMockTestHelper.mockGetAll(testHelper.createRandomCompany());
+        companiesMockTestHelper.mockGetAll();
         var result = get(BASE_PATH, HttpStatus.OK, CompanyResponse[].class);
         assertEquals(1, result.length);
     }

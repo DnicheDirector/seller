@@ -7,7 +7,6 @@ import java.time.ZonedDateTime;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Table;
 import javax.persistence.GenerationType;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.ManyToOne;
@@ -20,20 +19,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(schema = Position.SCHEMA, name = Position.TABLE)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Position {
 
-  public static final String SCHEMA = "seller_system";
-  public static final String TABLE = "position";
-
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "position_id_generator")
   @SequenceGenerator(
-          schema = SCHEMA,
           name = "position_id_generator",
           sequenceName = "position_sequence",
           allocationSize = 1

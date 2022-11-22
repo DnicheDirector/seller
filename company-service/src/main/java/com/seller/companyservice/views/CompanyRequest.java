@@ -1,16 +1,12 @@
 package com.seller.companyservice.views;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
 
 @Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class CompanyRequest {
   @NotNull
   private String name;

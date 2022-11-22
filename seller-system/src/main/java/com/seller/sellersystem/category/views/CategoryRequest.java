@@ -1,14 +1,13 @@
 package com.seller.sellersystem.category.views;
 
 import javax.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Data
-@SuperBuilder
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
 public class CategoryRequest {
   @NotNull

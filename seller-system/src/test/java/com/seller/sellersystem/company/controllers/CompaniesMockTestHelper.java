@@ -52,9 +52,9 @@ public class CompaniesMockTestHelper {
     }
 
     @SneakyThrows
-    public void mockGetById(Long id, CompanyRequest request) {
+    public void mockGetById(Long id) {
         var body = objectMapper.writeValueAsString(
-                createCompanyResponse(request)
+                createCompanyResponse()
         );
         stubFor(WireMock.get(urlEqualTo(String.format("%s/%s", BASE_PATH, id))).willReturn(
                         aResponse()
@@ -66,9 +66,9 @@ public class CompaniesMockTestHelper {
     }
 
     @SneakyThrows
-    public void mockGetAll(CompanyResponse response) {
+    public void mockGetAll() {
         var body = objectMapper.writeValueAsString(
-                Collections.singletonList(response)
+                Collections.singletonList(createCompanyResponse())
         );
         stubFor(WireMock.get(urlEqualTo(BASE_PATH)).willReturn(
                         aResponse()
@@ -86,6 +86,16 @@ public class CompaniesMockTestHelper {
                 .created(ZonedDateTime.now())
                 .email(request.getEmail())
                 .description(request.getDescription())
+                .build();
+    }
+
+    private CompanyResponse createCompanyResponse() {
+        return CompanyResponse.builder()
+                .id(MOCK_ID)
+                .name("Dniche COmpany")
+                .created(ZonedDateTime.now())
+                .email("dniche@gmail.com")
+                .description("description")
                 .build();
     }
 }

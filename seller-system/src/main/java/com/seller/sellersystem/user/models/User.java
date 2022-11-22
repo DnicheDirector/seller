@@ -17,15 +17,12 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 
 @Entity
-@Table(schema = User.SCHEMA, name = User.TABLE)
+@Table(name = "users")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-
-  public static final String SCHEMA = "seller_system";
-  public static final String TABLE = "users";
 
   @Id
   @GeneratedValue(generator = "uuid")

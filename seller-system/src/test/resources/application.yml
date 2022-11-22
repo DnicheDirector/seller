@@ -8,6 +8,10 @@ spring:
               uri: http://localhost:${wiremock.server.port}
     config:
       enabled: false
+  jpa:
+    properties:
+      hibernate:
+        default_schema: seller_system
   liquibase:
     change-log: classpath:db/changelog/db.changelog.xml
 

@@ -6,6 +6,10 @@ server:
 spring:
   application:
     name: company-service
+  jpa:
+    properties:
+      hibernate:
+        default_schema: companies
   profiles:
     active: postgres-local
   config:

@@ -1,22 +1,20 @@
 package com.seller.sellersystem.user.views;
 
+import lombok.Builder;
+import lombok.Data;
+
 import java.time.ZonedDateTime;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 
 @Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class UserResponse extends UserRequest {
+@Builder
+public class UserResponse {
   private UUID id;
   private ZonedDateTime created;
   private ZonedDateTime updated;
+  private String username;
+  private String email;
+  private String name;
+  private String role;
+  private Long companyId;
 }

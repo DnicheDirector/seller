@@ -4,15 +4,11 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class PositionRequest {
   @NotNull
   private UUID itemId;

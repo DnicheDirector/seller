@@ -1,15 +1,11 @@
 package com.seller.sellersystem.user.views;
 
 import javax.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class UserRequest {
   @NotNull
   private String username;

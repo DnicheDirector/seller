@@ -1,6 +1,14 @@
 spring:
   liquibase:
     change-log: classpath:db/changelog/companies/db.changelog.xml
+  jpa:
+    properties:
+      hibernate:
+        default_schema: companies
   cloud:
     config:
       enabled: false
+
+eureka:
+  client:
+    enabled: false
