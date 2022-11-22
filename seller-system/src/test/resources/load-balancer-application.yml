@@ -1,0 +1,24 @@
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            company-service[0]:
+              uri: http://localhost:${wiremock.server.port}
+            company-service[1]:
+              uri: http://localhost:9002
+    loadbalancer:
+      service-discovery:
+        timeout: 5s
+    config:
+      enabled: false
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog.xml
+
+eureka:
+  client:
+    enabled: false
+
+wiremock:
+  reset-mappings-after-each-test: true

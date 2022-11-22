@@ -1,0 +1,22 @@
+server:
+  servlet:
+    context-path: /api
+  port: 8070
+
+spring:
+  application:
+    name: seller-system
+  jpa:
+    properties:
+      hibernate:
+        default_schema: seller_system
+  profiles:
+    active: postgres-local
+  config:
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog.xml
+
+cache:
+  expiration: 60
+  max-size: 20

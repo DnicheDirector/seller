@@ -1,0 +1,69 @@
+version: '3.9'
+
+services:
+  db:
+    image: 'postgres:15'
+    container_name: seller-db-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+
+  config-server:
+    build:
+      context: ../config-server
+    image: config-server
+    container_name: config_server
+    ports:
+      - "8888:8888"
+
+  eureka:
+    build:
+      context: ../discovery-server
+    image: discovery-server
+    container_name: "eureka"
+    ports:
+      - "8761:8761"
+
+  seller-system:
+    build:
+      context: ../seller-system
+    image: seller-system
+    container_name: seller-system
+    ports:
+      - "8070:8070"
+    environment:
+      CONFIG_SERVER_URL: $CONFIG_SERVER_URL
+    depends_on:
+      - "db"
+      - "eureka"
+      - "company-service"
+      - "config-server"
+    entrypoint: /bin/sh
+    command: >
+      -c "
+      while ! (nc -z config-server 8888); do sleep 5; done;
+      java -jar /seller-system.jar --spring.profiles.active=postgres-prod,prod
+      "
+
+  company-service:
+    build:
+      context: ../company-service
+    image: company-service
+    container_name: company-service
+    ports:
+      - "8072:8072"
+    environment:
+      CONFIG_SERVER_URL: $CONFIG_SERVER_URL
+    depends_on:
+      - "db"
+      - "eureka"
+      - "config-server"
+    entrypoint: /bin/sh
+    command: >
+      -c "
+      while ! (nc -z config-server 8888); do sleep 5; done;
+      java -jar /company-service.jar --spring.profiles.active=postgres-prod,prod
+      "

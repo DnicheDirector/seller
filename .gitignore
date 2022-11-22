@@ -1,6 +1,9 @@
 HELP.md
 target/
-!.mvn/wrapper/maven-wrapper.jar
+!seller-system/.mvn/wrapper/maven-wrapper.jar
+!company-service.mvn/wrapper/maven-wrapper.jar
+!discovery-server/.mvn/wrapper/maven-wrapper.jar
+!config-server/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
