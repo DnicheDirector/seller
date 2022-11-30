@@ -4,6 +4,8 @@ target/
 !company-service.mvn/wrapper/maven-wrapper.jar
 !discovery-server/.mvn/wrapper/maven-wrapper.jar
 !config-server/.mvn/wrapper/maven-wrapper.jar
+!gateway/.mvn/wrapper/maven-wrapper.jar
+!user-transaction-service/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 

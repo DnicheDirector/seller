@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway
+  config:
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
+  cloud:
+    gateway:
+      routes:
+        - id: company_service_route
+          uri: lb://company-service
+          predicates:
+            - Path=/api/companies/**
+        - id: user_transaction_service_route
+          uri: lb://user-transaction-service
+          predicates:
+            - Path=/api/user-transactions/**
+        - id: users_route
+          uri: lb://seller-system
+          predicates:
+            - Path=/api/users/**
+        - id: positions_route
+          uri: lb://seller-system
+          predicates:
+            - Path=/api/positions/**
+        - id: categories_route
+          uri: lb://seller-system
+          predicates:
+            - Path=/api/categories/**
+        - id: items_route
+          uri: lb://seller-system
+          predicates:
+            - Path=/api/items/**

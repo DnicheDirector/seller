@@ -67,3 +67,43 @@ services:
       while ! (nc -z config-server 8888); do sleep 5; done;
       java -jar /company-service.jar --spring.profiles.active=postgres-prod,prod
       "
+
+  user-transaction-service:
+    build:
+      context: ../user-transaction-service
+    image: user-transaction-service
+    container_name: user-transaction-service
+    ports:
+      - "8074:8074"
+    environment:
+      CONFIG_SERVER_URL: $CONFIG_SERVER_URL
+    depends_on:
+      - "db"
+      - "eureka"
+      - "config-server"
+    entrypoint: /bin/sh
+    command: >
+      -c "
+      while ! (nc -z config-server 8888); do sleep 5; done;
+      java -jar /user-transaction-service.jar --spring.profiles.active=postgres-prod,prod
+      "
+
+  gateway:
+    build:
+      context: ../gateway
+    image: gateway
+    container_name: gateway
+    ports:
+      - "8080:8080"
+    environment:
+      CONFIG_SERVER_URL: $CONFIG_SERVER_URL
+    depends_on:
+      - "db"
+      - "eureka"
+      - "config-server"
+    entrypoint: /bin/sh
+    command: >
+      -c "
+      while ! (nc -z config-server 8888); do sleep 5; done;
+      java -jar /gateway.jar --spring.profiles.active=prod
+      "

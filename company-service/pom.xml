@@ -14,14 +14,6 @@
 	<name>company-service</name>
 	<description>company-service</description>
 
-	<properties>
-		<lombok.version>1.18.24</lombok.version>
-		<mapstruct.version>1.5.3.Final</mapstruct.version>
-		<liquibase.version>4.17.2</liquibase.version>
-		<rest-assured.version>5.2.0</rest-assured.version>
-		<testcontainers.version>1.17.4</testcontainers.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -81,12 +73,6 @@
 			<artifactId>mapstruct-processor</artifactId>
 			<version>${mapstruct.version}</version>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.rest-assured</groupId>
-			<artifactId>rest-assured</artifactId>
-			<version>${rest-assured.version}</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>

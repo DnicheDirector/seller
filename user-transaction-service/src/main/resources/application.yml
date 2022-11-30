@@ -1,0 +1,21 @@
+server:
+  servlet:
+    context-path: /api
+  port: 8074
+
+spring:
+  application:
+    name: user-transaction-service
+  jpa:
+    properties:
+      hibernate:
+        default_schema: user_transactions
+  profiles:
+    active: postgres-local
+  config:
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
+  liquibase:
+    change-log: classpath:db/changelog/usertransactions/db.changelog.xml
+
+pagination:
+  max-page-size: 20

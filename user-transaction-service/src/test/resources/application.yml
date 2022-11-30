@@ -1,0 +1,26 @@
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/usertransactions/db.changelog.xml
+  jpa:
+    properties:
+      hibernate:
+        default_schema: user_transactions
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            seller-system[0]:
+              uri: http://localhost:${wiremock.server.port}
+    config:
+      enabled: false
+
+eureka:
+  client:
+    enabled: false
+
+wiremock:
+  reset-mappings-after-each-test: true
+
+pagination:
+  max-page-size: 20
