@@ -98,7 +98,6 @@ services:
     environment:
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
     depends_on:
-      - "db"
       - "eureka"
       - "config-server"
     entrypoint: /bin/sh
