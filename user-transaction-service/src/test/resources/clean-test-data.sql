@@ -1,1 +1,1 @@
-DELETE FROM companies.company;
+DELETE FROM user_transactions.user_transaction;
