@@ -1,4 +1,4 @@
-package com.seller.usertransactionservice.usertransaction.views;
+package com.seller.usertransactionservice.usertransaction.views.user;
 
 import lombok.Builder;
 import lombok.Data;

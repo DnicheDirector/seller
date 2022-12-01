@@ -1,0 +1,5 @@
+url: jdbc:postgresql://localhost:5432/seller_db
+username: sa
+password: 123456
+driver: org.postgresql.Driver
+changeLogFile: db/changelog/usertransactions/db.changelog.xml

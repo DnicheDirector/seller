@@ -15,7 +15,7 @@ spring:
   config:
     import: configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
   liquibase:
-    change-log: classpath:db/changelog/db.changelog.xml
+    change-log: classpath:db/changelog/sellersystem/db.changelog.xml
 
 cache:
   expiration: 60

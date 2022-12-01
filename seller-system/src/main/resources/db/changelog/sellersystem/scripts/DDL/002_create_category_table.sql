@@ -1,4 +1,9 @@
+--liquibase formatted sql
+--changeset alexander:seller-system-2
+
 CREATE SEQUENCE category_sequence START 1 INCREMENT 1;
+
+--rollback DROP TABLE category;
 
 CREATE TABLE category
 (
@@ -9,3 +14,5 @@ CREATE TABLE category
     CONSTRAINT pk_category PRIMARY KEY (id),
     CONSTRAINT fk_category_parent_category_id FOREIGN KEY (parent_category_id) REFERENCES category (id)
 );
+
+--rollback DROP SEQUENCE category_sequence;

@@ -1,4 +1,11 @@
+--liquibase formatted sql
+--changeset alexander:seller-system-4
+
 CREATE TYPE ROLE AS ENUM ('MANAGER', 'DIRECTOR', 'STORAGE_MANAGER');
+
+--rollback DROP TYPE ROLE;
+
+--changeset alexander:seller-system-5
 
 CREATE TABLE users
 (
@@ -13,3 +20,5 @@ CREATE TABLE users
     CONSTRAINT pk_users PRIMARY KEY (id),
     CONSTRAINT fk_users_company_id FOREIGN KEY (company_id) REFERENCES company (id)
 );
+
+--rollback DROP TABLE users;

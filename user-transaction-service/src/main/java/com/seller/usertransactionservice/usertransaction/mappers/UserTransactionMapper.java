@@ -1,8 +1,8 @@
 package com.seller.usertransactionservice.usertransaction.mappers;
 
 import com.seller.usertransactionservice.usertransaction.models.UserTransaction;
-import com.seller.usertransactionservice.usertransaction.views.UserTransactionRequest;
-import com.seller.usertransactionservice.usertransaction.views.UserTransactionResponse;
+import com.seller.usertransactionservice.usertransaction.views.user.UserTransactionRequest;
+import com.seller.usertransactionservice.usertransaction.views.user.UserTransactionResponse;
 import org.mapstruct.Mapper;
 
 import java.util.List;

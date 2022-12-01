@@ -2,8 +2,9 @@ package com.seller.usertransactionservice.usertransaction.controllers;
 
 import com.seller.usertransactionservice.usertransaction.mappers.UserTransactionMapper;
 import com.seller.usertransactionservice.usertransaction.services.UserTransactionService;
-import com.seller.usertransactionservice.usertransaction.views.UserTransactionRequest;
-import com.seller.usertransactionservice.usertransaction.views.UserTransactionResponse;
+import com.seller.usertransactionservice.usertransaction.views.page.ResponsePage;
+import com.seller.usertransactionservice.usertransaction.views.user.UserTransactionRequest;
+import com.seller.usertransactionservice.usertransaction.views.user.UserTransactionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -28,12 +29,14 @@ public class UserTransactionsController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<UserTransactionResponse> getAll(
+    public ResponsePage<UserTransactionResponse> getAll(
             @RequestParam UUID userId,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
-        return userTransactionService.getAll(userId, page, size).map(userTransactionMapper::toDto);
+        return new ResponsePage<>(
+                userTransactionService.getAll(userId, page, size).map(userTransactionMapper::toDto)
+        );
     }
 
     @PostMapping

@@ -1,3 +1,6 @@
+--liquibase formatted sql
+--changeset alexander:seller-system-3
+
 CREATE TABLE item
 (
     id          UUID                     NOT NULL,
@@ -8,3 +11,5 @@ CREATE TABLE item
     CONSTRAINT pk_item PRIMARY KEY (id),
     CONSTRAINT fk_item_category_id FOREIGN KEY (category_id) REFERENCES category (id)
 );
+
+--rollback DROP TABLE item;

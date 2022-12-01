@@ -39,7 +39,6 @@ services:
     depends_on:
       - "db"
       - "eureka"
-      - "company-service"
       - "config-server"
     entrypoint: /bin/sh
     command: >
@@ -61,10 +60,11 @@ services:
       - "db"
       - "eureka"
       - "config-server"
+      - "seller-system"
     entrypoint: /bin/sh
     command: >
       -c "
-      while ! (nc -z config-server 8888); do sleep 5; done;
+      while ! (nc -z config-server 8888 && nc -z seller-system 8070); do sleep 5; done;
       java -jar /company-service.jar --spring.profiles.active=postgres-prod,prod
       "
 

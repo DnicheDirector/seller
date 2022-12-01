@@ -14,6 +14,10 @@
 	<name>company-service</name>
 	<description>company-service</description>
 
+	<properties>
+		<liquibase-maven-plugin.version>4.17.2</liquibase-maven-plugin.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -111,6 +115,14 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-maven-plugin</artifactId>
+				<version>${liquibase-maven-plugin.version}</version>
+				<configuration>
+					<propertyFile>src/main/resources/liquibase.yml</propertyFile>
 				</configuration>
 			</plugin>
 		</plugins>

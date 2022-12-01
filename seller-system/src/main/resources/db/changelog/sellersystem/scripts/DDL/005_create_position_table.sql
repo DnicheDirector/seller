@@ -1,4 +1,9 @@
+--liquibase formatted sql
+--changeset alexander:seller-system-6
+
 CREATE SEQUENCE position_sequence START 1 INCREMENT 1;
+
+--rollback DROP TABLE position;
 
 CREATE TABLE position
 (
@@ -13,3 +18,5 @@ CREATE TABLE position
     CONSTRAINT fk_position_created_by_id FOREIGN KEY (created_by_id) REFERENCES users (id),
     CONSTRAINT fk_position_item_id FOREIGN KEY (item_id) REFERENCES item (id)
 );
+
+--rollback DROP SEQUENCE position_sequence;
