@@ -1,0 +1,44 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: company_service_route
+          uri: lb://company-service
+          predicates:
+            - Path=/api/companies/**
+        - id: user_transaction_service_route
+          uri: lb://user-transaction-service
+          predicates:
+            - Path=/api/user-transactions/**
+        - id: users_route
+          uri: lb://seller-system
+          predicates:
+            - Path=/api/users/**
+        - id: positions_route
+          uri: lb://seller-system
+          predicates:
+            - Path=/api/positions/**
+        - id: categories_route
+          uri: lb://seller-system
+          predicates:
+            - Path=/api/categories/**
+        - id: items_route
+          uri: lb://seller-system
+          predicates:
+            - Path=/api/items/**
+    discovery:
+      client:
+        simple:
+          instances:
+            seller-system[0]:
+              uri: http://localhost:${wiremock.server.port}
+            company-service[0]:
+              uri: http://localhost:${wiremock.server.port}
+            user-transaction-service[0]:
+              uri: http://localhost:${wiremock.server.port}
+    config:
+      enabled: false
+
+eureka:
+  client:
+    enabled: false

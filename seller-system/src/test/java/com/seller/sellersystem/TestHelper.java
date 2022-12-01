@@ -15,7 +15,6 @@ import com.seller.sellersystem.user.models.User;
 import com.seller.sellersystem.user.services.UserService;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
@@ -73,10 +72,10 @@ public class TestHelper {
     return userService.create(user);
   }
 
-  public Position createRandomPosition() {
+  public Position createRandomPosition(BigDecimal amount) {
     var position = Position.builder()
         .createdBy(createRandomUser())
-        .amount(BigDecimal.valueOf(generateRandomInt()))
+        .amount(amount)
         .created(ZonedDateTime.now())
         .companyId(createRandomCompany().getId())
         .item(createRandomItem())
@@ -86,10 +85,6 @@ public class TestHelper {
 
   private String generateRandomString() {
     return RandomStringUtils.randomAlphanumeric(20);
-  }
-
-  private int generateRandomInt() {
-    return new Random().nextInt(100000);
   }
 
 }

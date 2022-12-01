@@ -3,7 +3,6 @@ package com.seller.sellersystem;
 import static io.restassured.RestAssured.given;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.seller.sellersystem.containers.PostgreSQLTestContainer;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -76,6 +75,23 @@ public class BaseTest {
         .then()
         .assertThat()
         .statusCode(expectedStatusCode.value());
+  }
+
+  protected <T> T patch(String path, Object body, HttpStatus expectedStatusCode, Class<T> classType) {
+    return patch(path, body, expectedStatusCode)
+            .extract()
+            .as(classType);
+  }
+
+  protected ValidatableResponse patch(String path, Object body, HttpStatus expectedStatusCode) {
+    return given()
+            .body(body)
+            .contentType(ContentType.JSON)
+            .when()
+            .patch(path)
+            .then()
+            .assertThat()
+            .statusCode(expectedStatusCode.value());
   }
 
   protected <T> T post(String path, Object body, HttpStatus expectedStatusCode, Class<T> classType) {

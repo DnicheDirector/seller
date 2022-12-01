@@ -1,9 +1,13 @@
 package com.seller.sellersystem.position.services;
 
+import com.seller.sellersystem.position.exception.UpdatePositionAmountException;
 import com.seller.sellersystem.position.models.Position;
 import com.seller.sellersystem.position.repositories.PositionRepository;
 import com.seller.sellersystem.services.AbstractCrudService;
+
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,5 +31,17 @@ public class PositionService extends AbstractCrudService<PositionRepository, Pos
     var existing = getById(id);
     position.setCreated(existing.getCreated());
     return repository.save(position);
+  }
+
+  @Transactional
+  public Position subtractPositionAmount(Long id, BigDecimal requiredAmount) {
+    var existing = repository.getPositionByIdForUpdate(id);
+    var currentAmount = existing.getAmount();
+    if (currentAmount.compareTo(requiredAmount) > 0) {
+      existing.setAmount(currentAmount.subtract(requiredAmount));
+    } else {
+      throw new UpdatePositionAmountException(currentAmount, requiredAmount);
+    }
+    return existing;
   }
 }

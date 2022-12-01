@@ -1,17 +1,32 @@
 package com.seller.sellersystem.exceptionhandler;
 
+import java.time.ZonedDateTime;
 import java.util.NoSuchElementException;
+
+import com.seller.sellersystem.position.exception.UpdatePositionAmountException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(NoSuchElementException.class)
-  public ResponseEntity<String> handleNoSuchElementException() {
-    return new ResponseEntity<>("Such element doesn't exist", HttpStatus.NOT_FOUND);
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ErrorMessage handleNoSuchElementException() {
+    return new ErrorMessage("Such element doesn't exists", ZonedDateTime.now());
+  }
+
+  @ExceptionHandler(UpdatePositionAmountException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorMessage handleUpdatePositionAmountException(UpdatePositionAmountException e) {
+    return new ErrorMessage(
+            String.format(
+                    "Error while updating position amount: current amount:%s required amount:%s",
+                    e.getCurrentAmount(), e.getRequiredAmount()
+            ), ZonedDateTime.now()
+    );
   }
 }

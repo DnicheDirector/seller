@@ -1,0 +1,1 @@
+DELETE FROM user_transactions.user_transaction;

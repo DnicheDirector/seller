@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +44,7 @@ public class CompaniesMockTestHelper {
         var body = objectMapper.writeValueAsString(
                 createCompanyResponse(request)
         );
-        stubFor(WireMock.put(urlEqualTo(String.format("%s/%s",BASE_PATH, id))).willReturn(
+        stubFor(WireMock.put(urlEqualTo(String.format("%s/%s", BASE_PATH, id))).willReturn(
                         aResponse()
                                 .withStatus(HttpStatus.CREATED.value())
                                 .withHeader(HEADER[0], HEADER[1])

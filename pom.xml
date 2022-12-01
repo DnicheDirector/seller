@@ -21,14 +21,21 @@
     <modules>
         <module>seller-system</module>
         <module>company-service</module>
+        <module>user-transaction-service</module>
         <module>discovery-server</module>
         <module>config-server</module>
+        <module>gateway</module>
     </modules>
 
     <properties>
         <java.version>11</java.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
         <checkstyle-plugin.version>3.2.0</checkstyle-plugin.version>
+        <lombok.version>1.18.24</lombok.version>
+        <mapstruct.version>1.5.3.Final</mapstruct.version>
+        <liquibase.version>4.17.2</liquibase.version>
+        <rest-assured.version>5.2.0</rest-assured.version>
+        <testcontainers.version>1.17.4</testcontainers.version>
     </properties>
 
     <dependencyManagement>

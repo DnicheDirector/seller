@@ -13,7 +13,7 @@ spring:
       hibernate:
         default_schema: seller_system
   liquibase:
-    change-log: classpath:db/changelog/db.changelog.xml
+    change-log: classpath:db/changelog/sellersystem/db.changelog.xml
 
 eureka:
   client:

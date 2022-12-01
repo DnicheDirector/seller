@@ -15,11 +15,7 @@
 	<description>company-service</description>
 
 	<properties>
-		<lombok.version>1.18.24</lombok.version>
-		<mapstruct.version>1.5.3.Final</mapstruct.version>
-		<liquibase.version>4.17.2</liquibase.version>
-		<rest-assured.version>5.2.0</rest-assured.version>
-		<testcontainers.version>1.17.4</testcontainers.version>
+		<liquibase-maven-plugin.version>4.17.2</liquibase-maven-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -83,12 +79,6 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>io.rest-assured</groupId>
-			<artifactId>rest-assured</artifactId>
-			<version>${rest-assured.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
@@ -125,6 +115,14 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-maven-plugin</artifactId>
+				<version>${liquibase-maven-plugin.version}</version>
+				<configuration>
+					<propertyFile>src/main/resources/liquibase.yml</propertyFile>
 				</configuration>
 			</plugin>
 		</plugins>
