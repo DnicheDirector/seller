@@ -18,6 +18,6 @@ public class ResponsePage<T> {
         this.content = page.getContent();
         this.totalElements = page.getTotalElements();
         this.totalPages = page.getTotalPages();
-        this.number= page.getNumber();
+        this.number = page.getNumber();
     }
 }

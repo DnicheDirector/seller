@@ -6,7 +6,6 @@ import com.seller.usertransactionservice.usertransaction.views.page.ResponsePage
 import com.seller.usertransactionservice.usertransaction.views.user.UserTransactionRequest;
 import com.seller.usertransactionservice.usertransaction.views.user.UserTransactionResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
