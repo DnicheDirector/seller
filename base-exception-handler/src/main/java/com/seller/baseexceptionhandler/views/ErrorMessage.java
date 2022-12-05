@@ -1,4 +1,4 @@
-package com.seller.sellersystem.exceptionhandler;
+package com.seller.baseexceptionhandler.views;
 
 import lombok.Data;
 
