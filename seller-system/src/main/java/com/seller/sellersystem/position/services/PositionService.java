@@ -37,7 +37,7 @@ public class PositionService extends AbstractCrudService<PositionRepository, Pos
   public Position subtractPositionAmount(Long id, BigDecimal requiredAmount) {
     var existing = repository.getPositionByIdForUpdate(id);
     var currentAmount = existing.getAmount();
-    if (currentAmount.compareTo(requiredAmount) > 0) {
+    if (currentAmount.compareTo(requiredAmount) >= 0) {
       existing.setAmount(currentAmount.subtract(requiredAmount));
     } else {
       throw new UpdatePositionAmountException(currentAmount, requiredAmount);

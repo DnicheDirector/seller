@@ -1,5 +1,6 @@
 package com.seller.usertransactionservice.exceptionhandler;
 
+import com.seller.usertransactionservice.usertransaction.exceptions.UserTransactionException;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,9 +20,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return new ErrorMessage("Such element doesn't exists", ZonedDateTime.now());
   }
 
-  @ExceptionHandler(FeignException.class)
+  @ExceptionHandler(UserTransactionException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public String handleUserTransactionException(FeignException e) {
-    return e.contentUTF8();
+  public ErrorMessage errorMessage(UserTransactionException e) {
+    return new ErrorMessage(
+            String.format("Exception during user transaction: %s", e.getMessage()),
+            ZonedDateTime.now()
+    );
   }
 }

@@ -48,6 +48,6 @@ public class Position {
   private ZonedDateTime created;
 
   @NotNull
-  @DecimalMin(value = "0.01")
+  @DecimalMin(value = "0.00")
   private BigDecimal amount;
 }

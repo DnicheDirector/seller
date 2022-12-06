@@ -6,6 +6,25 @@ server:
 spring:
   application:
     name: user-transaction-service
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.UUIDSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring:
+          json:
+            type:
+              mapping: reducePositionAmountMessage:com.seller.usertransactionservice.usertransaction.messages.ReducePositionAmountMessage
+    consumer:
+      group-id: user_transaction_status_group
+      key-deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            type:
+              mapping: userTransactionStatusMessage:com.seller.usertransactionservice.usertransaction.messages.UserTransactionStatusMessage
+
   jpa:
     properties:
       hibernate:
@@ -19,3 +38,8 @@ spring:
 
 pagination:
   max-page-size: 20
+
+kafka:
+  topics:
+    boughts_topic: topic_boughts
+    transaction_status_topic: topic_transaction_status
