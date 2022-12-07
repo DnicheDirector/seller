@@ -144,7 +144,7 @@ public class PositionsControllerTest extends BaseTest {
 
     kafkaTestProducer.sendReducePositionAmountMessage(userTransactionId, userId, position.getId(), amountForSubtract);
 
-    Unreliables.retryUntilTrue(10, TimeUnit.SECONDS, () -> {
+    Unreliables.retryUntilTrue(BASE_TIMEOUT, TimeUnit.SECONDS, () -> {
       var updatedPosition = positionRepository.findById(position.getId());
       return updatedPosition.stream().allMatch(p ->
               position.getAmount().subtract(amountForSubtract).compareTo(p.getAmount()) == 0
