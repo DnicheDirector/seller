@@ -5,22 +5,30 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.seller.sellersystem.BaseTest;
+import com.seller.sellersystem.position.controllers.kafka.KafkaTestConsumer;
+import com.seller.sellersystem.position.controllers.kafka.KafkaTestProducer;
 import com.seller.sellersystem.position.models.Position;
+import com.seller.sellersystem.position.repositories.PositionRepository;
 import com.seller.sellersystem.position.views.PositionRequest;
 import com.seller.sellersystem.position.views.PositionResponse;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.seller.sellersystem.position.views.UpdatePositionAmountRequest;
+import com.seller.sellersystem.usertransaction.messages.UserTransactionStatus;
+import com.seller.sellersystem.usertransaction.messages.UserTransactionStatusMessage;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.rnorth.ducttape.unreliables.Unreliables;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @Sql(scripts = "/clean-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class PositionsControllerTest extends BaseTest {
@@ -31,6 +39,13 @@ public class PositionsControllerTest extends BaseTest {
   private UUID userId;
   private List<Position> positions;
   private List<UUID> itemsIds;
+
+  @Autowired
+  private KafkaTestConsumer kafkaTestConsumer;
+  @Autowired
+  private KafkaTestProducer kafkaTestProducer;
+  @SpyBean
+  private PositionRepository positionRepository;
 
   @BeforeEach
   public void init() {
@@ -46,6 +61,11 @@ public class PositionsControllerTest extends BaseTest {
             testHelper.createRandomPosition(BigDecimal.valueOf(100)),
             testHelper.createRandomPosition(BigDecimal.valueOf(55))
     );
+  }
+
+  @AfterEach
+  public void reset() {
+    kafkaTestConsumer.reset();
   }
 
   @Test
@@ -116,11 +136,31 @@ public class PositionsControllerTest extends BaseTest {
   }
 
   @Test
-  public void successUpdatePositionAmount() {
+  public void successUpdatePositionAmount() throws InterruptedException {
     var amountForSubtract = BigDecimal.valueOf(40);
     var position = positions.get(0);
 
-    var result = updatePositionAmount(position.getId(), amountForSubtract);
+    var userTransactionId = 1L;
+
+    kafkaTestProducer.sendReducePositionAmountMessage(userTransactionId, userId, position.getId(), amountForSubtract);
+
+    Unreliables.retryUntilTrue(10, TimeUnit.SECONDS, () -> {
+      var updatedPosition = positionRepository.findById(position.getId());
+      return updatedPosition.stream().allMatch(p ->
+              position.getAmount().subtract(amountForSubtract).compareTo(p.getAmount()) == 0
+      );
+    });
+    var messageReceived = kafkaTestConsumer.getLatch().await(BASE_TIMEOUT, TimeUnit.SECONDS);
+
+    assertTrue(messageReceived);
+
+    assertEquals(userTransactionId, kafkaTestConsumer.getConsumedMessages().get(0).getUserTransactionId());
+    assertEquals(UserTransactionStatus.SUCCESS, kafkaTestConsumer.getConsumedMessages().get(0).getStatus());
+
+    verify(positionRepository, times(1))
+            .getPositionByIdForUpdate(position.getId());
+
+    var result = getPosition(position.getId());
 
     assertEquals(position.getId(), result.getId());
     assertEquals(0, position.getAmount().subtract(amountForSubtract).compareTo(result.getAmount()));
@@ -131,18 +171,37 @@ public class PositionsControllerTest extends BaseTest {
     var amountForSubtract1 = BigDecimal.valueOf(40);
     var amountForSubtract2 = BigDecimal.valueOf(50);
 
+    var userTransactionId1 = 1L;
+    var userTransactionId2 = 2L;
+
     var position = positions.get(0);
 
-    ExecutorService executorService = Executors.newFixedThreadPool(2);
-    executorService.submit(() -> updatePositionAmount(position.getId(), amountForSubtract1));
-    executorService.submit(() -> updatePositionAmount(position.getId(), amountForSubtract2));
+    kafkaTestConsumer.setLatch(2);
 
-    executorService.shutdown();
-    var executed = executorService.awaitTermination(1, TimeUnit.MINUTES);
+    kafkaTestProducer.sendReducePositionAmountMessage(userTransactionId1, userId, position.getId(), amountForSubtract1);
+    kafkaTestProducer.sendReducePositionAmountMessage(userTransactionId2, userId, position.getId(), amountForSubtract2);
+
+    Unreliables.retryUntilTrue(BASE_TIMEOUT, TimeUnit.SECONDS, () -> {
+      var updatedPosition = positionRepository.findById(position.getId());
+      return updatedPosition.stream().allMatch(p ->
+              position.getAmount().subtract(amountForSubtract1).subtract(amountForSubtract2).compareTo(p.getAmount()) == 0
+      );
+    });
+    var messageConsumed = kafkaTestConsumer.getLatch().await(BASE_TIMEOUT, TimeUnit.SECONDS);
+
+    var userTransactionStatusMessage1 = new UserTransactionStatusMessage(userTransactionId1, UserTransactionStatus.SUCCESS);
+    var userTransactionStatusMessage2 = new UserTransactionStatusMessage(userTransactionId2, UserTransactionStatus.SUCCESS);
+
+    assertTrue(messageConsumed);
+
+    assertEquals(2, kafkaTestConsumer.getConsumedMessages().size());
+    assertEquals(Arrays.asList(userTransactionStatusMessage1, userTransactionStatusMessage2), kafkaTestConsumer.getConsumedMessages());
+
+    verify(positionRepository, times(2))
+            .getPositionByIdForUpdate(position.getId());
 
     var updatedPosition = getPosition(position.getId());
 
-    assertTrue(executed);
     assertEquals(position.getId(), updatedPosition.getId());
     assertEquals(0, position.getAmount()
             .subtract(amountForSubtract1)
@@ -152,12 +211,22 @@ public class PositionsControllerTest extends BaseTest {
   }
 
   @Test
-  public void updatePositionAmountReturnsBadRequestIfInsufficientAmount() {
-    var dto = new UpdatePositionAmountRequest(BigDecimal.valueOf(120));
+  public void updatePositionAmountSetErrorStatusIfInsufficientAmount() throws InterruptedException {
+    var amountForSubtract = BigDecimal.valueOf(120);
+    var userTransactionId = 1L;
 
     var position = positions.get(0);
 
-    patch(String.format("%s/amount", getPath(BASE_PATH, position.getId())), dto, HttpStatus.BAD_REQUEST);
+    kafkaTestProducer.sendReducePositionAmountMessage(userTransactionId, userId, position.getId(), amountForSubtract);
+
+    var messageConsumed = kafkaTestConsumer.getLatch().await(BASE_TIMEOUT, TimeUnit.SECONDS);
+    var actualPosition = getPosition(position.getId());
+
+    assertTrue(messageConsumed);
+    assertEquals(1, kafkaTestConsumer.getConsumedMessages().size());
+    assertEquals(0, position.getAmount().compareTo(actualPosition.getAmount()));
+    assertEquals(userTransactionId, kafkaTestConsumer.getConsumedMessages().get(0).getUserTransactionId());
+    assertEquals(UserTransactionStatus.ERROR, kafkaTestConsumer.getConsumedMessages().get(0).getStatus());
   }
 
   @Test
@@ -174,13 +243,5 @@ public class PositionsControllerTest extends BaseTest {
 
   private PositionResponse getPosition(Long id) {
     return get(getPath(BASE_PATH, id), HttpStatus.OK, PositionResponse.class);
-  }
-
-  private PositionResponse updatePositionAmount(Long id, BigDecimal amountForSubtract) {
-    var dto = new UpdatePositionAmountRequest(amountForSubtract);
-    return patch(
-            String.format("%s/amount", getPath(BASE_PATH, id)),
-            dto, HttpStatus.OK, PositionResponse.class
-    );
   }
 }

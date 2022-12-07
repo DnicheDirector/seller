@@ -5,6 +5,25 @@ spring:
     properties:
       hibernate:
         default_schema: user_transactions
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.UUIDSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring:
+          json:
+            type:
+              mapping: "userTransactionStatusMessage:com.seller.usertransactionservice.usertransaction.messages.UserTransactionStatusMessage, reducePositionAmountMessage:com.seller.usertransactionservice.usertransaction.messages.ReducePositionAmountMessage"
+    consumer:
+      group-id: user_transaction_status_group
+      key-deserializer: org.apache.kafka.common.serialization.UUIDDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring:
+          json:
+            type:
+              mapping: "userTransactionStatusMessage:com.seller.usertransactionservice.usertransaction.messages.UserTransactionStatusMessage, reducePositionAmountMessage:com.seller.usertransactionservice.usertransaction.messages.ReducePositionAmountMessage"
   cloud:
     discovery:
       client:
@@ -24,3 +43,8 @@ wiremock:
 
 pagination:
   max-page-size: 20
+
+kafka:
+  topics:
+    boughts_topic: topic_boughts
+    transaction_status_topic: topic_transaction_status

@@ -7,12 +7,10 @@ import com.seller.sellersystem.position.views.PositionResponse;
 import java.util.List;
 import javax.validation.Valid;
 
-import com.seller.sellersystem.position.views.UpdatePositionAmountRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -65,15 +63,6 @@ public class PositionsController {
     return positionMapper.toDto(
         positionService.update(id, position)
     );
-  }
-
-  @PatchMapping("{id}/amount")
-  @ResponseStatus(HttpStatus.OK)
-  public PositionResponse updatePositionAmount(
-          @PathVariable Long id, @RequestBody @Valid UpdatePositionAmountRequest request
-  ) {
-    var position = positionService.subtractPositionAmount(id, request.getAmountForSubtract());
-    return positionMapper.toDto(position);
   }
 
   @DeleteMapping("{id}")

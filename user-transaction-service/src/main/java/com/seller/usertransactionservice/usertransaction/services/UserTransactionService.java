@@ -7,7 +7,6 @@ import com.seller.usertransactionservice.usertransaction.models.UserTransactionS
 import com.seller.usertransactionservice.usertransaction.models.UserTransaction;
 import com.seller.usertransactionservice.usertransaction.producers.PositionProducer;
 import com.seller.usertransactionservice.usertransaction.repositories.UserTransactionRepository;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

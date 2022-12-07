@@ -1,7 +1,6 @@
 package com.seller.usertransactionservice.exceptionhandler;
 
 import com.seller.usertransactionservice.usertransaction.exceptions.UserTransactionException;
-import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;

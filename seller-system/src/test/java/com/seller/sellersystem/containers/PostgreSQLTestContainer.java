@@ -27,6 +27,6 @@ public class PostgreSQLTestContainer extends PostgreSQLContainer<PostgreSQLTestC
   }
 
   @Override
-  public void stop() {
-  }
+  public void stop() { }
+
 }
