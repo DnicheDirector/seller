@@ -1,5 +1,6 @@
 package com.seller.usertransactionservice.usertransaction.views.user;
 
+import com.seller.usertransactionservice.usertransaction.models.UserTransactionStatus;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,4 +16,5 @@ public class UserTransactionResponse {
     private BigDecimal amount;
     private ZonedDateTime created;
     private UUID createdById;
+    private UserTransactionStatus status;
 }

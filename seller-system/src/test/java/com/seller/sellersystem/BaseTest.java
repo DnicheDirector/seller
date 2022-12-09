@@ -3,6 +3,7 @@ package com.seller.sellersystem;
 import static io.restassured.RestAssured.given;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.seller.sellersystem.containers.KafkaTestContainer;
 import com.seller.sellersystem.containers.PostgreSQLTestContainer;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -25,6 +26,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public class BaseTest {
 
+  protected static final int BASE_TIMEOUT = 10;
+
   @LocalServerPort
   private int port;
 
@@ -36,6 +39,9 @@ public class BaseTest {
   @Container
   public static PostgreSQLTestContainer postgreSQLContainer = PostgreSQLTestContainer.getInstance();
 
+  @Container
+  public static KafkaTestContainer kafkaTestContainer = KafkaTestContainer.getInstance();
+
   @Autowired
   protected ObjectMapper objectMapper;
 
@@ -45,6 +51,7 @@ public class BaseTest {
   @DynamicPropertySource
   public static void overrideProperties(DynamicPropertyRegistry registry) {
       postgreSQLContainer.addTestContainerProperties(registry);
+      kafkaTestContainer.addTestContainersProperties(registry);
   }
 
   protected <T> T get(String path, HttpStatus expectedStatusCode, Class<T> classType) {

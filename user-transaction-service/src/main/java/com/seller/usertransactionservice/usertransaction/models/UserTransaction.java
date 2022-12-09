@@ -4,9 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -45,4 +48,9 @@ public class UserTransaction {
 
     @NotNull
     private UUID createdById;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Type(type = "user_transaction_status_enum")
+    private UserTransactionStatus status;
 }

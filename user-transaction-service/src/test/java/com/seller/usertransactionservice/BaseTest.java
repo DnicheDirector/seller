@@ -1,5 +1,6 @@
 package com.seller.usertransactionservice;
 
+import com.seller.usertransactionservice.containers.KafkaTestContainer;
 import com.seller.usertransactionservice.containers.PostgreSQLTestContainer;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
@@ -24,6 +25,8 @@ import static io.restassured.RestAssured.given;
 @Testcontainers
 public class BaseTest {
 
+  protected static final int BASE_TIMEOUT = 10;
+
   @LocalServerPort
   private int port;
 
@@ -35,9 +38,13 @@ public class BaseTest {
   @Container
   public static PostgreSQLTestContainer postgreSQLContainer = PostgreSQLTestContainer.getInstance();
 
+  @Container
+  public static KafkaTestContainer kafkaTestContainer = KafkaTestContainer.getInstance();
+
   @DynamicPropertySource
   public static void overrideProperties(DynamicPropertyRegistry registry) {
     postgreSQLContainer.addTestContainerProperties(registry);
+    kafkaTestContainer.addTestContainersProperties(registry);
   }
 
   protected <T> T get(String path, HttpStatus expectedStatusCode, TypeRef<T> typeRef) {

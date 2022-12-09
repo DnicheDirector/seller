@@ -36,10 +36,12 @@ services:
       - "8070:8070"
     environment:
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
+      KAFKA_URL: $KAFKA_URL
     depends_on:
       - "db"
       - "eureka"
       - "config-server"
+      - "kafka"
     entrypoint: /bin/sh
     command: >
       -c "
@@ -77,10 +79,12 @@ services:
       - "8074:8074"
     environment:
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
+      KAFKA_URL: $KAFKA_URL
     depends_on:
       - "db"
       - "eureka"
       - "config-server"
+      - "kafka"
     entrypoint: /bin/sh
     command: >
       -c "
@@ -106,3 +110,27 @@ services:
       while ! (nc -z config-server 8888); do sleep 5; done;
       java -jar /gateway.jar --spring.profiles.active=prod
       "
+
+  zookeeper:
+    image: 'zookeeper:3.7.0'
+    container_name: zookeeper
+    restart: "no"
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: 'confluentinc/cp-kafka:latest-ubi8'
+    container_name: kafka
+    restart: "no"
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:PLAINTEXT,DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: DOCKER_INTERNAL://:29092,DOCKER_EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: DOCKER_INTERNAL://kafka:29092,DOCKER_EXTERNAL://kafka:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER_INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - "zookeeper"

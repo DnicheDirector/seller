@@ -1,5 +1,6 @@
 package com.seller.usertransactionservice.sellersystem.client;
 
+import com.seller.usertransactionservice.position.views.PositionResponse;
 import com.seller.usertransactionservice.position.views.UpdatePositionAmountRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,9 @@ import java.util.UUID;
 public interface SellerSystemClient {
     @PatchMapping("api/positions/{id}/amount")
     void updatePositionAmount(@PathVariable Long id, UpdatePositionAmountRequest request);
+
+    @GetMapping("api/positions/{id}")
+    PositionResponse getPositionById(@PathVariable Long id);
 
     @GetMapping("api/users/{id}")
     void getUserById(@PathVariable UUID id);

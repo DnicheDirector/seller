@@ -1,6 +1,6 @@
 package com.seller.usertransactionservice.exceptionhandler;
 
-import feign.FeignException;
+import com.seller.usertransactionservice.usertransaction.exceptions.UserTransactionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(FeignException.class)
+  @ExceptionHandler(UserTransactionException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public String handleUserTransactionException(FeignException e) {
-    return e.contentUTF8();
+  public ErrorMessage errorMessage(UserTransactionException e) {
+    return new ErrorMessage(
+            String.format("Exception during user transaction: %s", e.getMessage()),
+            ZonedDateTime.now()
+    );
   }
 }
