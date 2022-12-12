@@ -2,6 +2,7 @@ package com.seller.usertransactionservice;
 
 import com.seller.usertransactionservice.containers.KafkaTestContainer;
 import com.seller.usertransactionservice.containers.PostgreSQLTestContainer;
+import com.seller.usertransactionservice.containers.RedisTestContainer;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
@@ -41,10 +42,14 @@ public class BaseTest {
   @Container
   public static KafkaTestContainer kafkaTestContainer = KafkaTestContainer.getInstance();
 
+  @Container
+  public static RedisTestContainer redisTestContainer = RedisTestContainer.getInstance();
+
   @DynamicPropertySource
   public static void overrideProperties(DynamicPropertyRegistry registry) {
     postgreSQLContainer.addTestContainerProperties(registry);
     kafkaTestContainer.addTestContainersProperties(registry);
+    redisTestContainer.addTestContainerProperties(registry);
   }
 
   protected <T> T get(String path, HttpStatus expectedStatusCode, TypeRef<T> typeRef) {

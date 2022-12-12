@@ -3,6 +3,7 @@ package com.seller.usertransactionservice.usertransaction;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.seller.usertransactionservice.position.views.PositionResponse;
+import com.seller.usertransactionservice.user.views.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
@@ -25,12 +26,22 @@ public class UserTransactionsMockTestHelper {
 
     private final ObjectMapper objectMapper;
 
-
+    @SneakyThrows
     public void mockGetUser(UUID userId) {
+        var dto = UserResponse.builder()
+                .id(userId)
+                .created(ZonedDateTime.now())
+                .updated(ZonedDateTime.now())
+                .username("user1")
+                .email("user1@gmail.com")
+                .role("DIRECTOR")
+                .companyId(1L)
+                .build();
         stubFor(WireMock.get(urlEqualTo(String.format("%s/%s", BASE_USERS_PATH, userId))).willReturn(
                         aResponse()
                                 .withStatus(HttpStatus.OK.value())
                                 .withHeader(HEADER[0], HEADER[1])
+                                .withBody(objectMapper.writeValueAsString(dto))
                 )
         );
     }

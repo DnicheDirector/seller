@@ -2,6 +2,8 @@ package com.seller.usertransactionservice.sellersystem.client;
 
 import com.seller.usertransactionservice.position.views.PositionResponse;
 import com.seller.usertransactionservice.position.views.UpdatePositionAmountRequest;
+import com.seller.usertransactionservice.user.views.UserResponse;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,5 +20,6 @@ public interface SellerSystemClient {
     PositionResponse getPositionById(@PathVariable Long id);
 
     @GetMapping("api/users/{id}")
-    void getUserById(@PathVariable UUID id);
+    @Cacheable(value = "users")
+    UserResponse getUserById(@PathVariable UUID id);
 }
