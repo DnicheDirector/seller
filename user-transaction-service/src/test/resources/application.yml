@@ -51,4 +51,4 @@ kafka:
 
 redis:
   default:
-    ttl-in-minutes: 3
+    expiration: 3m

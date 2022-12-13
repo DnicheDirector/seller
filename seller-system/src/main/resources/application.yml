@@ -38,7 +38,7 @@ spring:
     change-log: classpath:db/changelog/sellersystem/db.changelog.xml
 
 cache:
-  expiration: 60
+  expiration: 1h
   max-size: 20
 
 kafka:
