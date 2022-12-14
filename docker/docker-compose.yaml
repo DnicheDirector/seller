@@ -80,11 +80,14 @@ services:
     environment:
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
       KAFKA_URL: $KAFKA_URL
+      REDIS_HOST: $REDIS_HOST
+      REDIS_PORT: $REDIS_PORT
     depends_on:
       - "db"
       - "eureka"
       - "config-server"
       - "kafka"
+      - "redis"
     entrypoint: /bin/sh
     command: >
       -c "
@@ -134,3 +137,8 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - "zookeeper"
+
+  redis:
+    image: redis:7.0.5-bullseye
+    ports:
+      - "6379:6379"

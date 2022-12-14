@@ -1,5 +1,6 @@
 package com.seller.usertransactionservice.usertransaction;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.seller.usertransactionservice.BaseTest;
 import com.seller.usertransactionservice.usertransaction.kafka.KafkaTestConsumer;
 import com.seller.usertransactionservice.usertransaction.kafka.KafkaTestProducer;
@@ -17,25 +18,35 @@ import org.rnorth.ducttape.unreliables.Unreliables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@Sql(scripts = "/clean-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class UserTransactionsControllerTest extends BaseTest {
     private static final String BASE_PATH = "/user-transactions";
+    private static final String BASE_USERS_PATH = "/api/users";
 
     private static final Long POSITION_ID = 1L;
     private static final UUID USER_ID = UUID.randomUUID();
+
+    private static final String CACHE_NAME = "users";
 
     private UserTransaction createdUserTransaction;
 
@@ -47,6 +58,8 @@ public class UserTransactionsControllerTest extends BaseTest {
     private KafkaTestConsumer kafkaTestConsumer;
     @Autowired
     private KafkaTestProducer kafkaTestProducer;
+    @Autowired
+    private CacheManager cacheManager;
 
     @Value("${pagination.max-page-size}")
     private int maxPageSize;
@@ -71,6 +84,8 @@ public class UserTransactionsControllerTest extends BaseTest {
     @AfterEach
     public void reset() {
         kafkaTestConsumer.resetLatch();
+        Optional.ofNullable(cacheManager.getCache(CACHE_NAME))
+                .ifPresent(cache -> cache.evictIfPresent(USER_ID));
     }
 
     @Test
@@ -146,5 +161,26 @@ public class UserTransactionsControllerTest extends BaseTest {
 
         assertNotNull(response);
         assertEquals(maxPageSize, response.getContent().size());
+    }
+
+    @Test
+    public void testCache() {
+        var dto = UserTransactionRequest.builder()
+                .amount(BigDecimal.valueOf(1000))
+                .createdById(USER_ID)
+                .positionId(POSITION_ID)
+                .build();
+        post(BASE_PATH, dto, HttpStatus.CREATED, UserTransactionResponse.class);
+
+        var cacheValue = cacheManager.getCache(CACHE_NAME).get(USER_ID);
+
+        assertNotNull(cacheValue);
+        assertNotNull(cacheValue.get());
+
+        post(BASE_PATH, dto, HttpStatus.CREATED, UserTransactionResponse.class);
+
+        WireMock.verify(exactly(1),
+                getRequestedFor(urlEqualTo(String.format("%s/%s", BASE_USERS_PATH, USER_ID)))
+        );
     }
 }

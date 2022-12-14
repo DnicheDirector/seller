@@ -6,6 +6,9 @@ server:
 spring:
   application:
     name: user-transaction-service
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
   kafka:
     bootstrap-servers: ${KAFKA_URL:localhost:9092}
     producer:
@@ -44,3 +47,7 @@ kafka:
   topics:
     boughts_topic: topic_boughts
     transaction_status_topic: topic_transaction_status
+
+redis:
+  default:
+    expiration: 3m

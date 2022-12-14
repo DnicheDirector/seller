@@ -48,3 +48,7 @@ kafka:
   topics:
     boughts_topic: topic_boughts
     transaction_status_topic: topic_transaction_status
+
+redis:
+  default:
+    expiration: 3m
