@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 public class UserTransactionStatusMessage {
-    private Long userTransactionId;
+    private String userTransactionId;
     private UserTransactionStatus status;
 }

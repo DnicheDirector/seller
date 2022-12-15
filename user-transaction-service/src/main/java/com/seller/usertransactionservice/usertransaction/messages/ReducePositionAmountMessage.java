@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 public class ReducePositionAmountMessage {
-    private Long userTransactionId;
+    private String userTransactionId;
     private UUID userId;
     private BigDecimal amount;
     private Long positionId;

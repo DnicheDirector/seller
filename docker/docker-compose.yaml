@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  db:
+  postgres-db:
     image: 'postgres:15'
     container_name: seller-db-postgres
     ports:
@@ -10,6 +10,20 @@ services:
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
       POSTGRES_DB: $POSTGRES_DB
+    volumes:
+      - ${HOME}/seller-data/postgres-data:/var/lib/postgresql/data
+
+  mongo-db:
+    image: mongo:6.0.3-focal
+    container_name: seller-mongodb
+    ports:
+      - "${MONGO_DB_PORT}:${MONGO_DB_PORT}"
+    environment:
+      - MONGO_INITDB_DATABASE=$MONGO_DB_DATABASE
+      - MONGO_INITDB_ROOT_USERNAME=$MONGO_DB_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGO_DB_PASSWORD
+    volumes:
+      - ${HOME}/seller-data/mongo-data:/data/db
 
   config-server:
     build:
@@ -38,7 +52,7 @@ services:
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
       KAFKA_URL: $KAFKA_URL
     depends_on:
-      - "db"
+      - "postgres-db"
       - "eureka"
       - "config-server"
       - "kafka"
@@ -59,7 +73,7 @@ services:
     environment:
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
     depends_on:
-      - "db"
+      - "postgres-db"
       - "eureka"
       - "config-server"
       - "seller-system"
@@ -82,8 +96,13 @@ services:
       KAFKA_URL: $KAFKA_URL
       REDIS_HOST: $REDIS_HOST
       REDIS_PORT: $REDIS_PORT
+      MONGO_DB_PORT: $MONGO_DB_PORT
+      MONGO_DB_HOST: $MONGO_DB_HOST
+      MONGO_DB_USERNAME: $MONGO_DB_USER
+      MONGO_DB_PASSWORD: $MONGO_DB_PASSWORD
+      MONGO_DB_DATABASE: $MONGO_DB_DATABASE
     depends_on:
-      - "db"
+      - "mongo-db"
       - "eureka"
       - "config-server"
       - "kafka"
@@ -92,7 +111,7 @@ services:
     command: >
       -c "
       while ! (nc -z config-server 8888); do sleep 5; done;
-      java -jar /user-transaction-service.jar --spring.profiles.active=postgres-prod,prod
+      java -jar /user-transaction-service.jar --spring.profiles.active=prod
       "
 
   gateway:

@@ -6,6 +6,7 @@ import com.seller.usertransactionservice.usertransaction.views.page.ResponsePage
 import com.seller.usertransactionservice.usertransaction.views.user.UserTransactionRequest;
 import com.seller.usertransactionservice.usertransaction.views.user.UserTransactionResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.util.UUID;
@@ -25,25 +27,22 @@ public class UserTransactionsController {
 
     private final UserTransactionService userTransactionService;
     private final UserTransactionMapper userTransactionMapper;
+    private final CacheManager cacheManager;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ResponsePage<UserTransactionResponse> getAll(
+    public Mono<ResponsePage<UserTransactionResponse>> getAll(
             @RequestParam UUID userId,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size
     ) {
-        return new ResponsePage<>(
-                userTransactionService.getAll(userId, page, size).map(userTransactionMapper::toDto)
-        );
+        return userTransactionService.getAll(userId, page, size).map(userTransactionMapper::toDto);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserTransactionResponse create(@RequestBody @Valid UserTransactionRequest request) {
+    public Mono<UserTransactionResponse> create(@RequestBody @Valid UserTransactionRequest request) {
         var userTransaction = userTransactionMapper.fromDto(request);
-        return userTransactionMapper.toDto(
-                userTransactionService.create(userTransaction)
-        );
+        return userTransactionService.create(userTransaction).map(userTransactionMapper::toDto);
     }
 }

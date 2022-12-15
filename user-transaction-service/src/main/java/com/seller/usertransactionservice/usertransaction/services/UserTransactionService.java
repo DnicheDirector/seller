@@ -7,11 +7,13 @@ import com.seller.usertransactionservice.usertransaction.models.UserTransactionS
 import com.seller.usertransactionservice.usertransaction.models.UserTransaction;
 import com.seller.usertransactionservice.usertransaction.producers.PositionProducer;
 import com.seller.usertransactionservice.usertransaction.repositories.UserTransactionRepository;
+import com.seller.usertransactionservice.usertransaction.views.page.ResponsePage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.cache.CacheMono;
+import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -26,28 +28,22 @@ public class UserTransactionService {
     private final PositionProducer positionProducer;
 
     @Transactional
-    public UserTransaction create(UserTransaction userTransaction) {
-        try {
-            sellerSystemClient.getUserById(userTransaction.getCreatedById());
-
-            var position = sellerSystemClient.getPositionById(userTransaction.getPositionId());
-            if (position.getAmount().compareTo(userTransaction.getAmount()) < 0) {
-                throw new UserTransactionException(position.getAmount(), userTransaction.getAmount());
-            }
-
-            userTransaction.setCreated(ZonedDateTime.now());
-            userTransaction.setStatus(UserTransactionStatus.IN_PROGRESS);
-            var saved = userTransactionRepository.save(userTransaction);
-
-            positionProducer.sendReducePositionAmountMessage(userTransaction);
-
-            return saved;
-        } catch (Exception e) {
-            throw new UserTransactionException(e.getMessage());
-        }
+    public Mono<UserTransaction> create(UserTransaction userTransaction) {
+        return sellerSystemClient.getUserById(userTransaction.getCreatedById())
+                .flatMap(userResponse -> sellerSystemClient.getPositionById(userTransaction.getPositionId()))
+                .flatMap(position -> {
+                    if (position.getAmount().compareTo(userTransaction.getAmount()) < 0) {
+                        return Mono.error(new UserTransactionException(position.getAmount(), userTransaction.getAmount()));
+                    }
+                    userTransaction.setCreated(ZonedDateTime.now());
+                    userTransaction.setStatus(UserTransactionStatus.IN_PROGRESS);
+                    return userTransactionRepository.save(userTransaction);
+                })
+                .doOnNext(transaction -> positionProducer.sendReducePositionAmountMessage(userTransaction))
+                .onErrorMap(error -> new UserTransactionException(error.getMessage()));
     }
 
-    public Page<UserTransaction> getAll(UUID userId, Integer page, Integer size) {
+    public Mono<ResponsePage<UserTransaction>> getAll(UUID userId, Integer page, Integer size) {
         var pageNumber = page != null
                 ? page
                 : 0;
@@ -60,7 +56,7 @@ public class UserTransactionService {
     }
 
     @Transactional
-    public void updateUserTransactionStatus(Long id, UserTransactionStatus status) {
-        userTransactionRepository.updateUserTransactionStatus(id, status);
+    public Mono<Void> updateUserTransactionStatus(String id, UserTransactionStatus status) {
+        return userTransactionRepository.updateUserTransactionStatus(id, status);
     }
 }

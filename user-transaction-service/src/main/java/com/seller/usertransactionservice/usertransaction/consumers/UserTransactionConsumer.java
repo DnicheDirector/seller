@@ -15,7 +15,8 @@ public class UserTransactionConsumer {
     @KafkaListener(topics = "${kafka.topics.transaction_status_topic}")
     public void consumeUserTransactionStatusMessage(UserTransactionStatusMessage message) {
         if (message.getStatus() != null) {
-            userTransactionService.updateUserTransactionStatus(message.getUserTransactionId(), message.getStatus());
+            userTransactionService.updateUserTransactionStatus(message.getUserTransactionId(), message.getStatus())
+                    .subscribe();
         }
     }
 }

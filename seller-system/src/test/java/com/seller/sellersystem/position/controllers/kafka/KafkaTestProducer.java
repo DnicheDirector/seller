@@ -16,7 +16,7 @@ public class KafkaTestProducer {
     private final KafkaTopics kafkaTopics;
     private final KafkaTemplate<UUID, ReducePositionAmountMessage> kafkaTemplate;
 
-    public void sendReducePositionAmountMessage(Long userTransactionId, UUID userId, Long positionId, BigDecimal amount) {
+    public void sendReducePositionAmountMessage(String userTransactionId, UUID userId, Long positionId, BigDecimal amount) {
         var message = ReducePositionAmountMessage.builder()
                 .userId(userId)
                 .userTransactionId(userTransactionId)
