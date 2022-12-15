@@ -140,7 +140,7 @@ public class PositionsControllerTest extends BaseTest {
     var amountForSubtract = BigDecimal.valueOf(40);
     var position = positions.get(0);
 
-    var userTransactionId = "1387383872377283";
+    var userTransactionId = generateRandomId();
 
     kafkaTestProducer.sendReducePositionAmountMessage(userTransactionId, userId, position.getId(), amountForSubtract);
 
@@ -171,8 +171,8 @@ public class PositionsControllerTest extends BaseTest {
     var amountForSubtract1 = BigDecimal.valueOf(40);
     var amountForSubtract2 = BigDecimal.valueOf(50);
 
-    String userTransactionId1 = "11381317313";
-    String userTransactionId2 = "383823829389";
+    String userTransactionId1 = generateRandomId();
+    String userTransactionId2 = generateRandomId();
 
     var position = positions.get(0);
 
@@ -213,7 +213,7 @@ public class PositionsControllerTest extends BaseTest {
   @Test
   public void updatePositionAmountSetErrorStatusIfInsufficientAmount() throws InterruptedException {
     var amountForSubtract = BigDecimal.valueOf(120);
-    var userTransactionId = "12345";
+    var userTransactionId = generateRandomId();
 
     var position = positions.get(0);
 
@@ -243,5 +243,9 @@ public class PositionsControllerTest extends BaseTest {
 
   private PositionResponse getPosition(Long id) {
     return get(getPath(BASE_PATH, id), HttpStatus.OK, PositionResponse.class);
+  }
+
+  private String generateRandomId() {
+    return UUID.randomUUID().toString();
   }
 }
