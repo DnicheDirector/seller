@@ -1,4 +1,4 @@
-package com.seller.reactivecachestarter.reactivecache.annotations;
+package com.seller.reactivecachestarter.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,7 +1,7 @@
-package com.seller.reactivecachestarter.reactivecache.aspects;
+package com.seller.reactivecachestarter.aspects;
 
+import com.seller.reactivecachestarter.annotations.ReactiveMonoCacheable;
 import com.seller.reactivecachestarter.exceptions.IncorrectMethodDefinitionException;
-import com.seller.reactivecachestarter.reactivecache.annotations.ReactiveMonoCacheable;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -26,7 +26,7 @@ public class ReactiveCacheableAspect {
 
     private final CacheManager cacheManager;
 
-    @Around("@annotation(com.seller.reactivecachestarter.reactivecache.annotations.ReactiveMonoCacheable) && args(..)")
+    @Around("@annotation(com.seller.reactivecachestarter.annotations.ReactiveMonoCacheable) && args(..)")
     public Mono<?> cacheResult(ProceedingJoinPoint joinPoint) {
         var cache = getCache(joinPoint);
         var cacheKey = getCacheKey(joinPoint);

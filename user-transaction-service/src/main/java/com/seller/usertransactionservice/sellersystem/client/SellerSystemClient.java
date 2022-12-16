@@ -1,6 +1,6 @@
 package com.seller.usertransactionservice.sellersystem.client;
 
-import com.seller.reactivecachestarter.reactivecache.annotations.ReactiveMonoCacheable;
+import com.seller.reactivecachestarter.annotations.ReactiveMonoCacheable;
 import com.seller.usertransactionservice.position.views.PositionResponse;
 import com.seller.usertransactionservice.position.views.UpdatePositionAmountRequest;
 import com.seller.usertransactionservice.user.views.UserResponse;
