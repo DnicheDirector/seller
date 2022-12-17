@@ -11,7 +11,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class UserTransactionResponse {
-    private Long id;
+    private String id;
     private Long positionId;
     private BigDecimal amount;
     private ZonedDateTime created;

@@ -6,9 +6,19 @@ server:
 spring:
   application:
     name: user-transaction-service
+  cache:
+    cache-names: users
   redis:
     host: ${REDIS_HOST:localhost}
     port: ${REDIS_PORT:6379}
+  data:
+    mongodb:
+      host: ${MONGO_DB_HOST:localhost}
+      port: ${MONGO_DB_PORT:27017}
+      username: ${MONGO_DB_USERNAME:sa}
+      password: ${MONGO_DB_PASSWORD:123456}
+      database: ${MONGO_DB_DATABASE:seller_db}
+      authentication-database: admin
   kafka:
     bootstrap-servers: ${KAFKA_URL:localhost:9092}
     producer:
@@ -37,8 +47,6 @@ spring:
     active: postgres-local
   config:
     import: configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
-  liquibase:
-    change-log: classpath:db/changelog/usertransactions/db.changelog.xml
 
 pagination:
   max-page-size: 20

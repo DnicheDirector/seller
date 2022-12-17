@@ -6,13 +6,13 @@ import org.testcontainers.utility.DockerImageName;
 
 public class RedisTestContainer extends GenericContainer<RedisTestContainer> {
 
-    private static final String REDIS_CONTAINER_NAME = "redis:7.0.5-bullseye";
+    private static final String REDIS_IMAGE = "redis:7.0.5-bullseye";
     private static final int PORT = 6379;
 
     private static RedisTestContainer redisTestContainer;
 
     private RedisTestContainer() {
-       super(DockerImageName.parse(REDIS_CONTAINER_NAME));
+       super(DockerImageName.parse(REDIS_IMAGE));
     }
 
     public static RedisTestContainer getInstance() {

@@ -38,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@Sql(scripts = "/clean-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class UserTransactionsControllerTest extends BaseTest {
     private static final String BASE_PATH = "/user-transactions";
     private static final String BASE_USERS_PATH = "/api/users";
@@ -76,13 +75,14 @@ public class UserTransactionsControllerTest extends BaseTest {
                     .createdById(USER_ID)
                     .status(UserTransactionStatus.IN_PROGRESS)
                     .build();
-            userTransactionRepository.save(userTransaction);
+            userTransactionRepository.save(userTransaction).block();
             this.createdUserTransaction = userTransaction;
         }
     }
 
     @AfterEach
     public void reset() {
+        userTransactionRepository.deleteAll().block();
         kafkaTestConsumer.resetLatch();
         Optional.ofNullable(cacheManager.getCache(CACHE_NAME))
                 .ifPresent(cache -> cache.evictIfPresent(USER_ID));
@@ -124,7 +124,9 @@ public class UserTransactionsControllerTest extends BaseTest {
                 createdUserTransaction.getId(), createdUserTransaction.getCreatedById(), UserTransactionStatus.SUCCESS
         );
         Unreliables.retryUntilTrue(BASE_TIMEOUT, TimeUnit.SECONDS, () -> {
-            var updatedUserTransaction = userTransactionRepository.findById(createdUserTransaction.getId());
+            var updatedUserTransaction = userTransactionRepository
+                    .findById(createdUserTransaction.getId())
+                    .blockOptional();
             return updatedUserTransaction.stream().allMatch(u -> u.getStatus() == UserTransactionStatus.SUCCESS);
         });
         verify(userTransactionRepository, times(1))
@@ -155,8 +157,7 @@ public class UserTransactionsControllerTest extends BaseTest {
     @Test
     public void getAllUserTransactionsWithPageParametersShouldReturnNoMoreThan20Records() {
         var response = get(
-                String.format("%s?userId=%s&size=%s", BASE_PATH, USER_ID, 25), HttpStatus.OK, new TypeRef<ResponsePage<UserTransactionResponse>>() {
-                }
+                String.format("%s?userId=%s&size=%s", BASE_PATH, USER_ID, 25), HttpStatus.OK, new TypeRef<ResponsePage<UserTransactionResponse>>() {}
         );
 
         assertNotNull(response);

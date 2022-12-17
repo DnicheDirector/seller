@@ -1,10 +1,7 @@
 package com.seller.usertransactionservice.configuration;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -17,11 +14,10 @@ public class RedisConfiguration {
     @Bean
     public RedisCacheConfiguration defaultCacheConfiguration(ObjectMapper objectMapper, RedisProperties redisProperties) {
         var mapper = objectMapper.copy();
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         mapper.activateDefaultTyping(
-                LaissezFaireSubTypeValidator.instance,
+                objectMapper.getPolymorphicTypeValidator(),
                 ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.WRAPPER_ARRAY
+                JsonTypeInfo.As.PROPERTY
         );
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(redisProperties.getExpiration())
@@ -31,5 +27,5 @@ public class RedisConfiguration {
                                 .fromSerializer(new GenericJackson2JsonRedisSerializer(mapper))
                 );
     }
-    
+
 }

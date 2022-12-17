@@ -3,7 +3,6 @@ package com.seller.usertransactionservice.loadbalancer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import com.seller.usertransactionservice.containers.PostgreSQLTestContainer;
 import com.seller.usertransactionservice.position.views.UpdatePositionAmountRequest;
 import com.seller.usertransactionservice.sellersystem.client.SellerSystemClient;
 import io.restassured.RestAssured;
@@ -16,10 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
@@ -53,14 +49,6 @@ public class LoadBalancerTest {
         RestAssured.port = port;
     }
 
-    @Container
-    public static PostgreSQLTestContainer postgreSQLContainer = PostgreSQLTestContainer.getInstance();
-
-    @DynamicPropertySource
-    public static void overrideProperties(DynamicPropertyRegistry registry) {
-        postgreSQLContainer.addTestContainerProperties(registry);
-    }
-
     @RegisterExtension
     protected static WireMockExtension SellerSystemService = WireMockExtension.newInstance()
             .options(WireMockConfiguration.wireMockConfig().port(9002))
@@ -82,7 +70,7 @@ public class LoadBalancerTest {
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HEADER[0], HEADER[1])));
 
-        sellerSystemClient.updatePositionAmount(POSITION_ID, new UpdatePositionAmountRequest(BigDecimal.ONE));
+        sellerSystemClient.updatePositionAmount(POSITION_ID, new UpdatePositionAmountRequest(BigDecimal.ONE)).block();
         verify(moreThanOrExactly(1), patchRequestedFor(urlEqualTo(getUpdatePositionAmountUrl())));
     }
 
@@ -95,7 +83,7 @@ public class LoadBalancerTest {
                         .withHeader(HEADER[0], HEADER[1])
                         .withFixedDelay(DELAY_AFTER_RETRY)));
 
-        sellerSystemClient.updatePositionAmount(POSITION_ID, new UpdatePositionAmountRequest(BigDecimal.ONE));
+        sellerSystemClient.updatePositionAmount(POSITION_ID, new UpdatePositionAmountRequest(BigDecimal.ONE)).block();
         verify(moreThanOrExactly(1), patchRequestedFor(urlEqualTo(getUpdatePositionAmountUrl())));
     }
 

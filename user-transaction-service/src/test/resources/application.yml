@@ -1,6 +1,4 @@
 spring:
-  liquibase:
-    change-log: classpath:db/changelog/usertransactions/db.changelog.xml
   jpa:
     properties:
       hibernate:

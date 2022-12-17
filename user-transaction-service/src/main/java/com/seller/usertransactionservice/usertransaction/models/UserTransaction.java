@@ -4,36 +4,23 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-@Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Document
 public class UserTransaction {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_transaction_id_generator")
-    @SequenceGenerator(
-            name = "user_transaction_id_generator",
-            sequenceName = "user_transaction_sequence",
-            allocationSize = 1
-    )
-    private Long id;
+    private String id;
 
     @NotNull
     private Long positionId;
@@ -43,14 +30,11 @@ public class UserTransaction {
     private BigDecimal amount;
 
     @NotNull
-    @Column(updatable = false)
     private ZonedDateTime created;
 
     @NotNull
     private UUID createdById;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
-    @Type(type = "user_transaction_status_enum")
     private UserTransactionStatus status;
 }

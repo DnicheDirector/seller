@@ -16,7 +16,7 @@ public class KafkaTestProducer {
     private final KafkaTopics kafkaTopics;
     private final KafkaTemplate<UUID, UserTransactionStatusMessage> kafkaTemplate;
 
-    public void sendUserTransactionStatusMessage(Long userTransactionId, UUID userId, UserTransactionStatus status) {
+    public void sendUserTransactionStatusMessage(String userTransactionId, UUID userId, UserTransactionStatus status) {
         var message = UserTransactionStatusMessage.builder()
                 .userTransactionId(userTransactionId)
                 .status(status)
