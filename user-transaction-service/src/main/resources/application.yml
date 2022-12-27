@@ -43,8 +43,6 @@ spring:
     properties:
       hibernate:
         default_schema: user_transactions
-  profiles:
-    active: postgres-local
   config:
     import: configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
 

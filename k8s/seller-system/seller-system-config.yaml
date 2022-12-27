@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: seller-system-config
+data:
+  datasource-url: jdbc:postgresql://postgres-service:5432/seller_db

@@ -6,6 +6,10 @@ server:
 spring:
   application:
     name: seller-system
+  datasource:
+    username: ${DATABASE_USERNAME:sa}
+    password: ${DATABASE_PASSWORD:123456}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/seller_db}
   kafka:
     bootstrap-servers: ${KAFKA_URL:localhost:9092}
     producer:
@@ -31,7 +35,7 @@ spring:
       hibernate:
         default_schema: seller_system
   profiles:
-    active: postgres-local
+    active: postgres
   config:
     import: configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
   liquibase:

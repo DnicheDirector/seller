@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seller-system-deployment
+  labels:
+    app: seller-system
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: seller-system
+  template:
+    metadata:
+      labels:
+        app: seller-system
+    spec:
+      containers:
+        - name: seller-system
+          image: kiberk/seller-system:7
+          ports:
+            - containerPort: 8070
+          livenessProbe:
+            httpGet:
+              path: /api/actuator/health/liveness
+              port: 8070
+          readinessProbe:
+            httpGet:
+              path: /api/actuator/health/readiness
+              port: 8070
+          env:
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-user
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-password
+            - name: DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: seller-system-config
+                  key: datasource-url
+            - name: CONFIG_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: config-server-config
+                  key: config-server-url
+            - name: KAFKA_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: kafka-url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: seller-system-service
+spec:
+  selector:
+    app: seller-system
+  ports:
+    - protocol: TCP
+      port: 8070
+      targetPort: 8070

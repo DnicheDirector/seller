@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: company-deployment
+  labels:
+    app: company
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: company
+  template:
+    metadata:
+      labels:
+        app: company
+    spec:
+      containers:
+        - name: company
+          image: kiberk/company-service:3
+          ports:
+            - containerPort: 8072
+          livenessProbe:
+            httpGet:
+              path: /api/actuator/health/liveness
+              port: 8072
+          readinessProbe:
+            httpGet:
+              path: /api/actuator/health/readiness
+              port: 8072
+          env:
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-user
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-password
+            - name: DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: company-service-config
+                  key: datasource-url
+            - name: CONFIG_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: config-server-config
+                  key: config-server-url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: company-service
+spec:
+  selector:
+    app: company
+  ports:
+    - protocol: TCP
+      port: 8072
+      targetPort: 8072

@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-transaction-service-deployment
+  labels:
+    app: user-transaction-service-deployment
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-transaction-service
+  template:
+    metadata:
+      labels:
+        app: user-transaction-service
+    spec:
+      containers:
+        - name: user-transaction-service
+          image: kiberk/user-transaction-service:2
+          ports:
+            - containerPort: 8074
+          livenessProbe:
+            httpGet:
+              path: /api/actuator/health/liveness
+              port: 8074
+          readinessProbe:
+            httpGet:
+              path: /api/actuator/health/readiness
+              port: 8074
+          env:
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-config
+                  key: redis-host
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-config
+                  key: redis-port
+            - name: MONGO_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-config
+                  key: mongo-host
+            - name: MONGO_DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-config
+                  key: mongo-port
+            - name: MONGO_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo-db-user
+            - name: MONGO_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: mongo-db-password
+            - name: MONGO_DB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-config
+                  key: mongo-database-name
+            - name: KAFKA_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-config
+                  key: kafka-url
+            - name: CONFIG_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: config-server-config
+                  key: config-server-url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-transaction-service
+spec:
+  selector:
+    app: user-transaction-service
+  ports:
+    - protocol: TCP
+      port: 8074
+      targetPort: 8074

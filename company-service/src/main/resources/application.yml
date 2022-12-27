@@ -6,12 +6,16 @@ server:
 spring:
   application:
     name: company-service
+  datasource:
+    username: ${DATABASE_USERNAME:sa}
+    password: ${DATABASE_PASSWORD:123456}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/seller_db}
   jpa:
     properties:
       hibernate:
         default_schema: companies
   profiles:
-    active: postgres-local
+    active: postgres
   config:
     import: configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
   liquibase:

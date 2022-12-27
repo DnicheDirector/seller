@@ -1,0 +1,52 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api/companies
+            pathType: Prefix
+            backend:
+              service:
+                name: company-service
+                port:
+                  number: 8072
+          - path: /api/user-transactions
+            pathType: Prefix
+            backend:
+              service:
+                name: user-transaction-service
+                port:
+                  number: 8074
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: seller-system-service
+                port:
+                  number: 8070
+          - path: /api/positions
+            pathType: Prefix
+            backend:
+              service:
+                name: seller-system-service
+                port:
+                  number: 8070
+          - path: /api/categories
+            pathType: Prefix
+            backend:
+              service:
+                name: seller-system-service
+                port:
+                  number: 8070
+          - path: /api/items
+            pathType: Prefix
+            backend:
+              service:
+                name: seller-system-service
+                port:
+                  number: 8070

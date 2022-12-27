@@ -33,7 +33,7 @@ services:
     ports:
       - "8888:8888"
 
-  eureka:
+  eureka-service:
     build:
       context: ../discovery-server
     image: discovery-server
@@ -51,16 +51,19 @@ services:
     environment:
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
       KAFKA_URL: $KAFKA_URL
+      DATASOURCE_URL: $POSTGRES_JDBC_URL
+      DATABASE_USERNAME: $POSTGRES_USER
+      DATABASE_PASSWORD: $POSTGRES_PASSWORD
     depends_on:
       - "postgres-db"
-      - "eureka"
+      - "eureka-service"
       - "config-server"
       - "kafka"
     entrypoint: /bin/sh
     command: >
       -c "
       while ! (nc -z config-server 8888); do sleep 5; done;
-      java -jar /seller-system.jar --spring.profiles.active=postgres-prod,prod
+      java -jar /seller-system.jar --spring.profiles.active=postgres,prod
       "
 
   company-service:
@@ -72,16 +75,19 @@ services:
       - "8072:8072"
     environment:
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
+      DATASOURCE_URL: $POSTGRES_JDBC_URL
+      DATABASE_USERNAME: $POSTGRES_USER
+      DATABASE_PASSWORD: $POSTGRES_PASSWORD
     depends_on:
       - "postgres-db"
-      - "eureka"
+      - "eureka-service"
       - "config-server"
       - "seller-system"
     entrypoint: /bin/sh
     command: >
       -c "
       while ! (nc -z config-server 8888 && nc -z seller-system 8070); do sleep 5; done;
-      java -jar /company-service.jar --spring.profiles.active=postgres-prod,prod
+      java -jar /company-service.jar --spring.profiles.active=postgres,prod
       "
 
   user-transaction-service:
@@ -103,7 +109,7 @@ services:
       MONGO_DB_DATABASE: $MONGO_DB_DATABASE
     depends_on:
       - "mongo-db"
-      - "eureka"
+      - "eureka-service"
       - "config-server"
       - "kafka"
       - "redis"
@@ -124,7 +130,7 @@ services:
     environment:
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
     depends_on:
-      - "eureka"
+      - "eureka-service"
       - "config-server"
     entrypoint: /bin/sh
     command: >

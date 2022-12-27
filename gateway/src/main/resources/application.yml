@@ -33,3 +33,12 @@ spring:
           uri: lb://seller-system
           predicates:
             - Path=/api/items/**
+
+management:
+  endpoint:
+    health:
+      group:
+        liveness:
+          include: livenessState
+      probes:
+        enabled: true
