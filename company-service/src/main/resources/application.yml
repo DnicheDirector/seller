@@ -6,6 +6,8 @@ server:
 spring:
   application:
     name: company-service
+  zipkin:
+    base-url: ${ZIPKIN_URL:http://localhost:9411/}
   datasource:
     username: ${DATABASE_USERNAME:sa}
     password: ${DATABASE_PASSWORD:123456}
@@ -20,3 +22,10 @@ spring:
     import: configserver:${CONFIG_SERVER_URL:http://localhost:8888/}
   liquibase:
     change-log: classpath:db/changelog/companies/db.changelog.xml
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - prometheus

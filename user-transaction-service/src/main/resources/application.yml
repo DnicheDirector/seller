@@ -6,6 +6,8 @@ server:
 spring:
   application:
     name: user-transaction-service
+  zipkin:
+    base-url: ${ZIPKIN_URL:http://localhost:9411/}
   cache:
     cache-names: users
   redis:
@@ -57,3 +59,13 @@ kafka:
 redis:
   default:
     expiration: 3m
+
+management:
+  endpoint:
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include:
+          - prometheus

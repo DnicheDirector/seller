@@ -3,12 +3,14 @@ package com.seller.companyservice.services;
 import com.seller.companyservice.models.Company;
 import com.seller.companyservice.repositories.CompanyRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CompanyService {
@@ -25,7 +27,9 @@ public class CompanyService {
 
   public Company create(Company company) {
     company.setCreated(ZonedDateTime.now());
-    return repository.save(company);
+    var created = repository.save(company);
+    log.info("Company created: {}", created);
+    return created;
   }
 
   @Transactional

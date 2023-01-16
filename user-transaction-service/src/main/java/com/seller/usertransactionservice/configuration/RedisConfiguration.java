@@ -12,7 +12,9 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 public class RedisConfiguration {
     
     @Bean
-    public RedisCacheConfiguration defaultCacheConfiguration(ObjectMapper objectMapper, RedisProperties redisProperties) {
+    public RedisCacheConfiguration defaultCacheConfiguration(
+            ObjectMapper objectMapper, RedisProperties redisProperties
+    ) {
         var mapper = objectMapper.copy();
         mapper.activateDefaultTyping(
                 objectMapper.getPolymorphicTypeValidator(),

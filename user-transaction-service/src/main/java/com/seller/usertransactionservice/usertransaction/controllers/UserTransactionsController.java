@@ -6,7 +6,6 @@ import com.seller.usertransactionservice.usertransaction.views.page.ResponsePage
 import com.seller.usertransactionservice.usertransaction.views.user.UserTransactionRequest;
 import com.seller.usertransactionservice.usertransaction.views.user.UserTransactionResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +26,6 @@ public class UserTransactionsController {
 
     private final UserTransactionService userTransactionService;
     private final UserTransactionMapper userTransactionMapper;
-    private final CacheManager cacheManager;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)

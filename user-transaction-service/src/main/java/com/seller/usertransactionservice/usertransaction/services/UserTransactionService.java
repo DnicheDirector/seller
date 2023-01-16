@@ -9,15 +9,16 @@ import com.seller.usertransactionservice.usertransaction.producers.PositionProdu
 import com.seller.usertransactionservice.usertransaction.repositories.UserTransactionRepository;
 import com.seller.usertransactionservice.usertransaction.views.page.ResponsePage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.cache.CacheMono;
 import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserTransactionService {
@@ -29,17 +30,20 @@ public class UserTransactionService {
 
     @Transactional
     public Mono<UserTransaction> create(UserTransaction userTransaction) {
+        log.info("Creating user transaction : {}", userTransaction);
         return sellerSystemClient.getUserById(userTransaction.getCreatedById())
                 .flatMap(userResponse -> sellerSystemClient.getPositionById(userTransaction.getPositionId()))
                 .flatMap(position -> {
                     if (position.getAmount().compareTo(userTransaction.getAmount()) < 0) {
-                        return Mono.error(new UserTransactionException(position.getAmount(), userTransaction.getAmount()));
+                        return Mono.error(
+                                new UserTransactionException(position.getAmount(), userTransaction.getAmount())
+                        );
                     }
                     userTransaction.setCreated(ZonedDateTime.now());
                     userTransaction.setStatus(UserTransactionStatus.IN_PROGRESS);
                     return userTransactionRepository.save(userTransaction);
                 })
-                .doOnNext(transaction -> positionProducer.sendReducePositionAmountMessage(userTransaction))
+                .doOnNext(positionProducer::sendReducePositionAmountMessage)
                 .onErrorMap(error -> new UserTransactionException(error.getMessage()));
     }
 

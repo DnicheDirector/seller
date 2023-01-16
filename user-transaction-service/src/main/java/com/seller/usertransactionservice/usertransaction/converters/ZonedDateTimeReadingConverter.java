@@ -3,7 +3,6 @@ package com.seller.usertransactionservice.usertransaction.converters;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 
@@ -14,6 +13,6 @@ public enum ZonedDateTimeReadingConverter implements Converter<String, ZonedDate
 
     @Override
     public ZonedDateTime convert(@Nullable String source) {
-        return source == null ? null: ZonedDateTime.parse(source);
+        return source == null ? null : ZonedDateTime.parse(source);
     }
 }

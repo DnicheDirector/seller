@@ -4,11 +4,13 @@ import com.seller.sellersystem.kafka.configuration.KafkaTopics;
 import com.seller.sellersystem.usertransaction.messages.UserTransactionStatus;
 import com.seller.sellersystem.usertransaction.messages.UserTransactionStatusMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class UserTransactionProducer {
@@ -21,6 +23,7 @@ public class UserTransactionProducer {
                 .userTransactionId(userTransactionId)
                 .status(status)
                 .build();
+        log.info("Sending update user transaction status message: {}", message);
         kafkaTemplate.send(kafkaTopics.getTransactionStatusTopic(), userId, message);
     }
 

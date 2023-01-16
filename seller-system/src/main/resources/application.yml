@@ -6,6 +6,8 @@ server:
 spring:
   application:
     name: seller-system
+  zipkin:
+    base-url: ${ZIPKIN_URL:http://localhost:9411/}
   datasource:
     username: ${DATABASE_USERNAME:sa}
     password: ${DATABASE_PASSWORD:123456}
@@ -49,3 +51,10 @@ kafka:
   topics:
     boughts_topic: topic_boughts
     transaction_status_topic: topic_transaction_status
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - prometheus

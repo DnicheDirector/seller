@@ -49,6 +49,7 @@ services:
     ports:
       - "8070:8070"
     environment:
+      ZIPKIN_URL: $ZIPKIN_URL
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
       KAFKA_URL: $KAFKA_URL
       DATASOURCE_URL: $POSTGRES_JDBC_URL
@@ -59,12 +60,16 @@ services:
       - "eureka-service"
       - "config-server"
       - "kafka"
+      - "zipkin"
     entrypoint: /bin/sh
     command: >
       -c "
       while ! (nc -z config-server 8888); do sleep 5; done;
       java -jar /seller-system.jar --spring.profiles.active=postgres,prod
       "
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
 
   company-service:
     build:
@@ -74,6 +79,7 @@ services:
     ports:
       - "8072:8072"
     environment:
+      ZIPKIN_URL: $ZIPKIN_URL
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
       DATASOURCE_URL: $POSTGRES_JDBC_URL
       DATABASE_USERNAME: $POSTGRES_USER
@@ -83,12 +89,16 @@ services:
       - "eureka-service"
       - "config-server"
       - "seller-system"
+      - "zipkin"
     entrypoint: /bin/sh
     command: >
       -c "
       while ! (nc -z config-server 8888 && nc -z seller-system 8070); do sleep 5; done;
       java -jar /company-service.jar --spring.profiles.active=postgres,prod
       "
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
 
   user-transaction-service:
     build:
@@ -98,6 +108,7 @@ services:
     ports:
       - "8074:8074"
     environment:
+      ZIPKIN_URL: $ZIPKIN_URL
       CONFIG_SERVER_URL: $CONFIG_SERVER_URL
       KAFKA_URL: $KAFKA_URL
       REDIS_HOST: $REDIS_HOST
@@ -113,12 +124,16 @@ services:
       - "config-server"
       - "kafka"
       - "redis"
+      - "zipkin"
     entrypoint: /bin/sh
     command: >
       -c "
       while ! (nc -z config-server 8888); do sleep 5; done;
       java -jar /user-transaction-service.jar --spring.profiles.active=prod
       "
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
 
   gateway:
     build:
@@ -167,3 +182,77 @@ services:
     image: redis:7.0.5-bullseye
     ports:
       - "6379:6379"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+    ports:
+      - "9200:9200"
+    environment:
+      - "discovery.type=single-node"
+      - "http.host=0.0.0.0"
+      - "transport.host=127.0.0.1"
+    volumes:
+      - ${HOME}/seller-data/elasticsearch/data:/var/lib/elasticsearch/data:rw  # Persistence data
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.2.0
+    ports:
+      - "25826:25826"
+      - "5044:5044"
+    volumes:
+      - ../logstash/pipeline:/usr/share/logstash/pipeline:ro                  # Pipeline configuration
+    restart: on-failure
+    depends_on:
+      - "elasticsearch"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.2.0
+    ports:
+      - "5601:5601"
+    restart: on-failure
+    depends_on:
+      - "elasticsearch"
+
+  filebeat:
+    build:
+      context: ../filebeat
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro           # Docker logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro                       # Additional information about containers
+      - ${HOME}/seller-data/filebeat/data:/usr/share/filebeat/data:rw      # Persistence data
+    user: root                                                             # Allow access to log files and docker.sock
+    restart: on-failure
+    depends_on:
+      - "logstash"
+
+  zipkin:
+    image: openzipkin/zipkin:2.24
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=elasticsearch
+      - ES_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - "elasticsearch"
+
+  prometheus:
+    image: prom/prometheus:v2.35.0
+    ports:
+      - "9090:9090"
+    container_name: prometheus
+    volumes:
+      - ../prometheus:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+
+  grafana:
+    image: grafana/grafana-oss:8.5.2
+    ports:
+      - "3000:3000"
+    container_name: grafana
+    volumes:
+      - ${HOME}/seller-data/grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_DOMAIN=localhost
+    user: root

@@ -27,6 +27,7 @@
         <module>gateway</module>
         <module>base-exception-handler</module>
         <module>reactive-cache-starter</module>
+        <module>logging-starter</module>
     </modules>
 
     <properties>
